@@ -133,12 +133,18 @@ int main(void)
     glBindBuffer(GL_ARRAY_BUFFER, 0); // Wala nang ginagalaw sa VBO.
     glBindVertexArray(0); // Wala ka nang ginagalaw na VAO.
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // EBO
-
+    
+    float x_mod = 0;
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+
+        x_mod -= 0.001f;
+
+        unsigned int xLoc = glGetUniformLocation(shaderProgram, "x");
+        glUniform1f(xLoc, x_mod);
 
         glBindVertexArray(VAO);
         //glDrawArrays(GL_TRIANGLES, 0, 3);
