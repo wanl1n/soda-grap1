@@ -2,6 +2,12 @@
 #include <GLFW/glfw3.h>
 #include "cmath"
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
+
+#include <string>
+#include <iostream>
+
 int main(void)
 {
     GLFWwindow* window;
@@ -24,6 +30,55 @@ int main(void)
     glfwMakeContextCurrent(window);
     gladLoadGL();
 
+    std::fstream vertSrc("../Shaders/sample.vert");
+    std::stringstream vertBuff;
+    vertBuff << vertSrc.rdbuf();
+    std::string vertS = vertBuff.str();
+    const char* v = vertS.c_str();
+
+    std::fstream fragSrc("../Shaders/sample.frag");
+    std::stringstream fragBuff;
+    fragBuff << fragSrc.rdbuf();
+    std::string fragS = fragBuff.str();
+    const char* f = fragS.c_str();
+
+    GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertShader, 1, &v, NULL);
+    glCompileShader(vertShader);
+
+    GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragShader, 1, &f, NULL);
+    glCompileShader(fragShader);
+
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertShader);
+    glAttachShader(shaderProgram, fragShader);
+
+    glLinkProgram(shaderProgram);
+
+    std::string path = "../3D/bunny.obj";
+    std::vector<tinyobj::shape_t> shape;
+    std::vector<tinyobj::material_t> material;
+    std::string warning, error;
+
+    tinyobj::attrib_t attributes;
+
+    bool success = tinyobj::LoadObj(
+        &attributes,
+        &shape,
+        &material,
+        &warning,
+        &error,
+        path.c_str()
+    );
+
+    std::vector<GLuint> mesh_indices;
+    for (int i = 0; i < shape[0].mesh.indices.size(); i++) {
+        mesh_indices.push_back(
+            shape[0].mesh.indices[i].vertex_index
+        );
+    }
+
     GLfloat vertices[]{
       // x,    y,    z
         0.0f, 0.5f, 0.0f, // Vertex 0
@@ -31,9 +86,14 @@ int main(void)
         0.5f, -0.5f, 0.f  // Vertex 2
     };
 
-    GLuint VAO, VBO;
+    GLuint indices[]{
+        0, 1, 2
+    };
+
+    GLuint VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
     // We're working with this VAO.
     glBindVertexArray(VAO);
@@ -41,8 +101,10 @@ int main(void)
     glBindBuffer(GL_ARRAY_BUFFER, VBO); // Binds VBO to VAO.
     glBufferData(
         GL_ARRAY_BUFFER, 
-        sizeof(vertices), 
-        vertices, 
+        sizeof(GLfloat) * attributes.vertices.size(),
+        &attributes.vertices[0],
+        /*sizeof(vertices), 
+        vertices, */
         GL_STATIC_DRAW //GL_DYNAMIC_DRAW
     );
 
@@ -55,12 +117,22 @@ int main(void)
         3 * sizeof(GL_FLOAT), // Size of the vertex data
         (void*)0
     );
-
     glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        sizeof(GLuint) * mesh_indices.size(),
+        mesh_indices.data(),
+        //sizeof(indices), 
+        //indices,
+        GL_STATIC_DRAW
+    );
 
     // Clean Up
     glBindBuffer(GL_ARRAY_BUFFER, 0); // Wala nang ginagalaw sa VBO.
     glBindVertexArray(0); // Wala ka nang ginagalaw na VAO.
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // EBO
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -69,7 +141,16 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        //glDrawArrays(GL_TRIANGLES, 0, 3);
+        glUseProgram(shaderProgram);
+
+        glDrawElements(
+            GL_TRIANGLES,
+            //sizeof(indices),
+            mesh_indices.size(),
+            GL_UNSIGNED_INT,
+            0
+        );
 
         /*float length = 0.3f;
         float angle, x, y;
@@ -96,6 +177,7 @@ int main(void)
     // Clean up
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;

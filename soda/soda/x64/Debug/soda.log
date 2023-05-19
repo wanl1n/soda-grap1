@@ -1,4 +1,4 @@
-﻿  glad.c
-  soda.cpp
+﻿  soda.cpp
+C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\soda\soda\soda.cpp(149,30): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   soda.vcxproj -> C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\soda\x64\Debug\soda.exe

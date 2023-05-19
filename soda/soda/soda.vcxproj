@@ -136,6 +136,13 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="soda.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tiny_obj_loader.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="sample.frag" />
+    <None Include="sample.vert" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
