@@ -8,6 +8,51 @@
 #include <string>
 #include <iostream>
 
+float x_mod = 0;
+float y_mod = 0;
+float r_mod = 0;
+float g_mod = 0;
+float b_mod = 0;
+
+void Key_Callback(
+    GLFWwindow* window,
+    int key,
+    int scancode,
+    int action, // Press or Release
+    int mod
+) {
+    if (key == GLFW_KEY_D &&
+        action == GLFW_PRESS)
+        x_mod += 0.1f;
+    if (key == GLFW_KEY_A &&
+        action == GLFW_PRESS)
+        x_mod -= 0.1f;
+    if (key == GLFW_KEY_W &&
+        action == GLFW_PRESS)
+        y_mod += 0.1f;
+    if (key == GLFW_KEY_S &&
+        action == GLFW_PRESS)
+        y_mod -= 0.1f;
+    if (key == GLFW_KEY_F &&
+        action == GLFW_PRESS)
+        r_mod -= 1.f;
+    if (key == GLFW_KEY_G &&
+        action == GLFW_PRESS)
+        g_mod -= 1.f;
+    if (key == GLFW_KEY_H &&
+        action == GLFW_PRESS)
+        b_mod -= 1.f;
+    if (key == GLFW_KEY_F &&
+        action == GLFW_RELEASE)
+        r_mod += 1.f;
+    if (key == GLFW_KEY_G &&
+        action == GLFW_RELEASE)
+        g_mod += 1.f;
+    if (key == GLFW_KEY_H &&
+        action == GLFW_RELEASE)
+        b_mod += 1.f;
+}
+
 int main(void)
 {
     GLFWwindow* window;
@@ -29,6 +74,8 @@ int main(void)
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
     gladLoadGL();
+
+    glfwSetKeyCallback(window, Key_Callback);
 
     std::fstream vertSrc("../Shaders/sample.vert");
     std::stringstream vertBuff;
@@ -134,17 +181,25 @@ int main(void)
     glBindVertexArray(0); // Wala ka nang ginagalaw na VAO.
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // EBO
     
-    float x_mod = 0;
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        x_mod -= 0.001f;
+        //x_mod -= 0.001f;
 
         unsigned int xLoc = glGetUniformLocation(shaderProgram, "x");
         glUniform1f(xLoc, x_mod);
+        unsigned int yLoc = glGetUniformLocation(shaderProgram, "y");
+        glUniform1f(yLoc, y_mod);
+
+        unsigned int rCol = glGetUniformLocation(shaderProgram, "r");
+        glUniform1f(rCol, r_mod);
+        unsigned int gCol = glGetUniformLocation(shaderProgram, "g");
+        glUniform1f(gCol, g_mod);
+        unsigned int bCol = glGetUniformLocation(shaderProgram, "b");
+        glUniform1f(bCol, b_mod);
 
         glBindVertexArray(VAO);
         //glDrawArrays(GL_TRIANGLES, 0, 3);
