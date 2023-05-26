@@ -1,4 +1,5 @@
 ﻿  soda.cpp
-C:\Users\G301\source\repos\soda-grap1\soda\soda\soda.cpp(278,9): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+C:\Users\G301\source\repos\soda-grap1\soda\soda\soda.cpp(152,39): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\G301\source\repos\soda-grap1\soda\soda\soda.cpp(152,31): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\G301\source\repos\soda-grap1\soda\soda\soda.cpp(394,9): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
   soda.vcxproj -> C:\Users\G301\source\repos\soda-grap1\soda\x64\Debug\soda.exe
