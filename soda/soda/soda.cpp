@@ -1,5 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include "cmath"
 
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -8,11 +11,19 @@
 #include <string>
 #include <iostream>
 
+float speed = 0.05f;
 float x_mod = 0;
 float y_mod = 0;
 float r_mod = 0;
 float g_mod = 0;
 float b_mod = 0;
+float rot_mod = 60.f;
+
+bool isMovingUp = false;
+bool isMovingDown = false;
+bool isMovingLeft = false;
+bool isMovingRight = false;
+bool isRotating = false;
 
 void Key_Callback(
     GLFWwindow* window,
@@ -21,18 +32,26 @@ void Key_Callback(
     int action, // Press or Release
     int mod
 ) {
-    if (key == GLFW_KEY_D &&
-        action == GLFW_PRESS)
-        x_mod += 0.1f;
-    if (key == GLFW_KEY_A &&
-        action == GLFW_PRESS)
-        x_mod -= 0.1f;
-    if (key == GLFW_KEY_W &&
-        action == GLFW_PRESS)
-        y_mod += 0.1f;
-    if (key == GLFW_KEY_S &&
-        action == GLFW_PRESS)
-        y_mod -= 0.1f;
+    if (key == GLFW_KEY_D && action == GLFW_PRESS)
+        isMovingRight = true;
+    if (key == GLFW_KEY_D && action == GLFW_RELEASE)
+        isMovingRight = false;
+
+    if (key == GLFW_KEY_A && action == GLFW_PRESS)
+        isMovingLeft = true;
+    if (key == GLFW_KEY_A && action == GLFW_RELEASE)
+        isMovingLeft = false;
+
+    if (key == GLFW_KEY_W && action == GLFW_PRESS)
+        isMovingUp = true;
+    if (key == GLFW_KEY_W && action == GLFW_RELEASE)
+        isMovingUp = false;
+
+    if (key == GLFW_KEY_S && action == GLFW_PRESS)
+        isMovingDown = true;
+    if (key == GLFW_KEY_S && action == GLFW_RELEASE)
+        isMovingDown = false;
+    
     if (key == GLFW_KEY_F &&
         action == GLFW_PRESS)
         r_mod -= 1.f;
@@ -51,6 +70,13 @@ void Key_Callback(
     if (key == GLFW_KEY_H &&
         action == GLFW_RELEASE)
         b_mod += 1.f;
+
+    if (key == GLFW_KEY_SPACE &&
+        action == GLFW_PRESS)
+        isRotating = true;
+    if (key == GLFW_KEY_SPACE &&
+        action == GLFW_RELEASE)
+        isRotating = false;
 }
 
 int main(void)
@@ -180,19 +206,25 @@ int main(void)
     glBindBuffer(GL_ARRAY_BUFFER, 0); // Wala nang ginagalaw sa VBO.
     glBindVertexArray(0); // Wala ka nang ginagalaw na VAO.
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // EBO
-    
+
+    // Creating identity matrices
+    glm::mat3 identity_matrix3 = glm::mat3(1.0f);
+    glm::mat4 identity_matrix4 = glm::mat4(1.0f);
+
+    //// Create a 3D translation matrix
+    //glm::mat4 translation = glm::translate(identity_matrix4, 
+    //                                       glm::vec3(x, y, z));
+    //glm::mat4 scale = glm::scale(identity_matrix4,
+    //                             glm::vec3(x, y, z));
+    //glm::mat4 rotation = glm::rotate(identity_matrix4,
+    //                                 glm::radians(theta),
+    //                                 glm::vec3(x, y, z));
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
-
-        //x_mod -= 0.001f;
-
-        unsigned int xLoc = glGetUniformLocation(shaderProgram, "x");
-        glUniform1f(xLoc, x_mod);
-        unsigned int yLoc = glGetUniformLocation(shaderProgram, "y");
-        glUniform1f(yLoc, y_mod);
 
         unsigned int rCol = glGetUniformLocation(shaderProgram, "r");
         glUniform1f(rCol, r_mod);
@@ -200,6 +232,38 @@ int main(void)
         glUniform1f(gCol, g_mod);
         unsigned int bCol = glGetUniformLocation(shaderProgram, "b");
         glUniform1f(bCol, b_mod);
+
+        glm::mat4 transformation_matrix = glm::translate(identity_matrix4,
+            glm::vec3(x_mod, y_mod, 0.f));
+
+        transformation_matrix = glm::scale(transformation_matrix,
+            glm::vec3(1.f, 2.f, 1.f));
+
+        // Update
+        if (isMovingUp)
+            y_mod += speed;
+        if (isMovingDown)
+            y_mod -= speed;
+        if (isMovingLeft)
+            x_mod -= speed;
+        if (isMovingRight)
+            x_mod += speed;
+        
+        if (isRotating)
+            rot_mod += 5.f;
+
+        transformation_matrix = glm::rotate(transformation_matrix,
+            glm::radians(rot_mod),
+            glm::vec3(0.f, 1.f, 0.f));
+
+        unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
+
+        glUniformMatrix4fv(
+            transformLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(transformation_matrix)
+        );
 
         glBindVertexArray(VAO);
         //glDrawArrays(GL_TRIANGLES, 0, 3);

@@ -1,12 +1,13 @@
 #version 330 core
 
-//location = 0 is from vertexattributepointer first argument
+//location = 0 is from VertexAttributePointer first argument
 layout(location = 0) in vec3 aPos;
 
-uniform float x;
-uniform float y;
+// Creates a Transform variable.
+// We'll assign the transformation matrix here later.
+uniform mat4 transform;
 
 void main() {
-	vec3 newPos = vec3(aPos.x + x, aPos.y + y, aPos.z);
-	gl_Position = vec4(newPos, 1.0);
+	// Multiply the transformation matrix to the vec4 version of aPos to get the final position.
+	gl_Position = transform * vec4(aPos, 1.0);
 }
