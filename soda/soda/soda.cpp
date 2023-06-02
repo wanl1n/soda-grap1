@@ -19,7 +19,7 @@ float r_mod = 0;
 float g_mod = 0;
 float b_mod = 0;
 
-float scale_mod = 1.0f;
+float scale_mod = 10.0f;
 
 float xrot_mod = 0.f;
 float yrot_mod = 0.f;
@@ -305,35 +305,56 @@ int main(void)
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+        
+        /* * * * * * * * * * * * SETTING UP THE VIEW MATRIX * * * * * * * * * * * */
+        // Making the camera variables and setting up.
+        glm::vec3 cameraPos = glm::vec3(x_mod, 0, 10.f);
+        glm::mat4 cameraPosMatrix = glm::translate(glm::mat4(1.0f), 
+                                                   cameraPos * -1.f);
+        glm::vec3 worldUp = glm::normalize(glm::vec3(0, 1.f, 0));
+        glm::vec3 cameraCenter = glm::vec3(x_mod, 3.0f, 0);
 
-        // Update
-        if (isMovingUp)
-            y_mod += speed;
-        if (isMovingDown)
-            y_mod -= speed;
-        if (isMovingLeft)
-            x_mod -= speed;
-        if (isMovingRight)
-            x_mod += speed;
+        // Making the vectors of the camera. ---- if not using lookAt().
+        glm::vec3 F = (cameraCenter - cameraPos); // Forward Vector
+        F = glm::normalize(F);
+        glm::vec3 R = glm::cross(F, worldUp); // Right Vector, No need to normalize because F is normalized.
+        glm::vec3 U = glm::cross(R, F); // Up Vector
 
-        if (isScalingUp)
-            scale_mod += speed;
-        if (isScalingDown && scale_mod >= 0.05f)
-            scale_mod -= speed;
+        // Making the camera orientation matrix. ---- if not using lookAt().
+        glm::mat4 cameraOrientation = glm::mat4(1.0f);
 
-        if (isZoomingIn)
-            fov_mod -= speed;
-        if (isZoomingOut)
-            fov_mod += speed;
+        // matrix[col][row]
+        cameraOrientation[0][0] = R.x;
+        cameraOrientation[1][0] = R.y;
+        cameraOrientation[2][0] = R.z;
+        cameraOrientation[0][1] = U.x;
+        cameraOrientation[1][1] = U.y;
+        cameraOrientation[2][1] = U.z;
+        cameraOrientation[0][2] = -F.x;
+        cameraOrientation[1][2] = -F.y;
+        cameraOrientation[2][2] = -F.z;
 
-        if (isRotatingUp)
-            xrot_mod += 5.f;
-        if (isRotatingDown)
-            xrot_mod -= 5.f;
-        if (isRotatingRight)
-            yrot_mod += 5.f;
-        if (isRotatingLeft)
-            yrot_mod -= 5.f;
+        // Final Computation for the View Matrix.
+        //glm::mat4 viewMatrix = cameraOrientation * cameraPosMatrix;
+        glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraCenter, worldUp); // For this, no need to make the vectors.
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+        
+        /* * * * * * * * * * * * * * * * * UPDATE * * * * * * * * * * * * * * * * */
+        if (isMovingUp) y_mod += speed;
+        if (isMovingDown) y_mod -= speed;
+        if (isMovingLeft) x_mod -= speed;
+        if (isMovingRight) x_mod += speed;
+
+        if (isScalingUp) scale_mod += speed;
+        if (isScalingDown && scale_mod >= 0.05f) scale_mod -= speed;
+
+        if (isZoomingIn) fov_mod -= speed;
+        if (isZoomingOut) fov_mod += speed;
+
+        if (isRotatingUp) xrot_mod += 5.f;
+        if (isRotatingDown) xrot_mod -= 5.f;
+        if (isRotatingRight) yrot_mod += 5.f;
+        if (isRotatingLeft) yrot_mod -= 5.f;
 
         unsigned int rCol = glGetUniformLocation(shaderProgram, "r");
         glUniform1f(rCol, r_mod);
@@ -350,10 +371,10 @@ int main(void)
         );
 
         glm::mat4 transformation_matrix = glm::translate(identity_matrix4,
-            glm::vec3(x_mod, y_mod, z_mod));
+            glm::vec3(0, y_mod, z_mod));
 
         transformation_matrix = glm::scale(transformation_matrix,
-            glm::vec3(scale_mod, scale_mod, 1.f));
+            glm::vec3(scale_mod, scale_mod, 10.f));
 
         transformation_matrix = glm::rotate(transformation_matrix,
             glm::radians(xrot_mod),
@@ -363,6 +384,9 @@ int main(void)
             glm::radians(yrot_mod),
             glm::vec3(0.f, 1.f, 0.f));
 
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        /* * * * * * * * * * * APPLYING TO VERTEX SHADER * * * * * * * * * * * * */
         // Gets the transformed position from the Shader program.
         unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");
         glUniformMatrix4fv(
@@ -370,6 +394,15 @@ int main(void)
             1,
             GL_FALSE,
             glm::value_ptr(transformation_matrix)
+        );
+
+        // Gets the view matrix from the shader program.
+        unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
+        glUniformMatrix4fv(
+            viewLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(viewMatrix)
         );
 
         // Gets the projected position from the shader program.
@@ -380,6 +413,8 @@ int main(void)
             GL_FALSE,
             glm::value_ptr(projection)
         );
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 
         glBindVertexArray(VAO);
         //glDrawArrays(GL_TRIANGLES, 0, 3);
