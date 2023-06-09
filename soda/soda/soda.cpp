@@ -8,6 +8,9 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include <string>
 #include <iostream>
 
@@ -19,7 +22,7 @@ float r_mod = 0;
 float g_mod = 0;
 float b_mod = 0;
 
-float scale_mod = 10.0f;
+float scale_mod = 1.0f;
 
 float xrot_mod = 0.f;
 float yrot_mod = 0.f;
@@ -160,6 +163,55 @@ int main(void)
     glfwMakeContextCurrent(window);
     gladLoadGL();
 
+    int img_width, img_height, color_channels; // Width, Height, and color channels of the Texture.
+
+    // Fix the flipped texture (by default it is flipped).
+    stbi_set_flip_vertically_on_load(true);
+    // Load the texture and fill out the variables.
+    unsigned char* text_bytes = stbi_load("../3D/ayaya.png", // Texture path
+                                          &img_width, // Width of the texture
+                                          &img_height, // height of the texture
+                                          &color_channels, // color channel
+                                          0);
+    // OpenGL reference to the texture.
+    GLuint texture;
+    // Generate a reference.
+    glGenTextures(1, &texture);
+    // Set the current texture we're working on to Texture 0.
+    glActiveTexture(GL_TEXTURE0);
+    // Bind our next tasks to Tex0 to our current reference similar to VBOs.
+    glBindTexture(GL_TEXTURE_2D, texture);
+    //If you want to set how the texture maps on a different size model
+    glTexParameteri(GL_TEXTURE_2D,
+        GL_TEXTURE_WRAP_S, // XY = ST (s for x, t for y)
+        GL_CLAMP_TO_EDGE //GL_CLAMP_TO_EDGE for stretch, 
+    );
+    glTexParameteri(GL_TEXTURE_2D,
+        GL_TEXTURE_WRAP_T, // XY = ST (s for x, t for y)
+        GL_REPEAT //GL_CLAMP_TO_EDGE for stretch, 
+    );
+
+    //Assign the loaded texture to the OpenGL reference.
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0, // Texture 0
+        GL_RGBA, // Target color format of the texture.
+        img_width, // Texture width
+        img_height, // Texture height
+        0, 
+        GL_RGBA, // Color format of the texture
+        GL_UNSIGNED_BYTE, 
+        text_bytes // loaded texture in bytes
+    );
+
+    // Generate the mipmaps to the current texture
+    glGenerateMipmap(GL_TEXTURE_2D);
+    // Free up the loaded bytes.
+    stbi_image_free(text_bytes);
+
+    // Enable Depth Testing
+    glEnable(GL_DEPTH_TEST);
+
     //glViewport(0, 0, 300, 600); // changes the size of the viewport; used for splitscreen etc.
 
     // Gets user input.
@@ -199,7 +251,7 @@ int main(void)
     glLinkProgram(shaderProgram);
 
     // Bunny Object elements
-    std::string path = "../3D/bunny.obj";
+    std::string path = "../3D/myCube.obj";
     std::vector<tinyobj::shape_t> shape;
     std::vector<tinyobj::material_t> material;
     std::string warning, error;
@@ -221,6 +273,17 @@ int main(void)
         );
     }
 
+    GLfloat UV[]{
+        0.f, 2.f,
+        0.f, 0.f,
+        2.f, 2.f,
+        2.f, 0.f,
+        2.f, 2.f,
+        2.f, 0.f,
+        0.f, 2.f,
+        0.f, 0.f
+    };
+
     GLfloat vertices[]{
       // x,    y,    z
         0.0f, 0.5f, 0.0f, // Vertex 0
@@ -232,9 +295,10 @@ int main(void)
         0, 1, 2
     };
 
-    GLuint VAO, VBO, EBO;
+    GLuint VAO, VBO, EBO, VBO_UV;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &VBO_UV); // Generate UV Buffer
     glGenBuffers(1, &EBO);
 
     // We're working with this VAO.
@@ -261,6 +325,7 @@ int main(void)
     );
     glEnableVertexAttribArray(0);
 
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
@@ -271,8 +336,28 @@ int main(void)
         GL_STATIC_DRAW
     );
 
+    // Bind the UV Buffer
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_UV);
+    // Add in the buffer data
+    glBufferData(GL_ARRAY_BUFFER,
+                 sizeof(GLfloat) * (sizeof(UV) / sizeof(UV[0])), //float * size of the UV array
+                 &UV[0], // The UV array earlier
+                 GL_DYNAMIC_DRAW
+    );
+    // How to interpret array above:
+    glVertexAttribPointer(
+        2, // Index 2 for UV
+        2, // UV
+        GL_FLOAT,
+        GL_FALSE,
+        2 * sizeof(float),
+        (void*)0
+    );
+    glEnableVertexAttribArray(2); // 2 for UV / Texture
     // Clean Up
     glBindBuffer(GL_ARRAY_BUFFER, 0); // Wala nang ginagalaw sa VBO.
+
+
     glBindVertexArray(0); // Wala ka nang ginagalaw na VAO.
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // EBO
 
@@ -304,7 +389,7 @@ int main(void)
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Clear the depth buffer as well.
         
         /* * * * * * * * * * * * SETTING UP THE VIEW MATRIX * * * * * * * * * * * */
         // Making the camera variables and setting up.
@@ -342,8 +427,8 @@ int main(void)
         /* * * * * * * * * * * * * * * * * UPDATE * * * * * * * * * * * * * * * * */
         if (isMovingUp) y_mod += speed;
         if (isMovingDown) y_mod -= speed;
-        if (isMovingLeft) x_mod -= speed;
-        if (isMovingRight) x_mod += speed;
+        if (isMovingLeft) x_mod += speed;
+        if (isMovingRight) x_mod -= speed;
 
         if (isScalingUp) scale_mod += speed;
         if (isScalingDown && scale_mod >= 0.05f) scale_mod -= speed;
@@ -370,11 +455,16 @@ int main(void)
             100.f
         );
 
+        /* APPLYING THE TEXTURE */
+        GLuint tex0Address = glGetUniformLocation(shaderProgram, "tex0");
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glUniform1i(tex0Address, 0);
+        /* * * * * * * * * * * * * * * * * * * */
         glm::mat4 transformation_matrix = glm::translate(identity_matrix4,
             glm::vec3(0, y_mod, z_mod));
 
         transformation_matrix = glm::scale(transformation_matrix,
-            glm::vec3(scale_mod, scale_mod, 10.f));
+            glm::vec3(scale_mod, scale_mod, scale_mod));
 
         transformation_matrix = glm::rotate(transformation_matrix,
             glm::radians(xrot_mod),
