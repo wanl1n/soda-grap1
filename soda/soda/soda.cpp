@@ -56,6 +56,7 @@ class Model3D {
             this->scale = glm::vec3(0.1f, 0.1f, 0.1f);
         }
 
+        // Draws the object.
         void draw(GLuint* shaderProgram, std::vector<GLfloat> fullVertexData) {
             // Create the transformation matrix and apply the transformation attributes at draw.
             glm::mat4 transformation_matrix = glm::translate(glm::mat4(1.0f), this->pos);
