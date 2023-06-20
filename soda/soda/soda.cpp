@@ -14,13 +14,13 @@
 #include <string>
 #include <iostream>
 
-float speed = 0.05f;
+float speed = 0.1f;
 float x_mod = 0;
 float y_mod = 0;
-float z_mod = -5.0f;
-float r_mod = 0;
-float g_mod = 0;
-float b_mod = 0;
+float z_mod = -50.f;
+//float r_mod = 0;
+//float g_mod = 0;
+//float b_mod = 0;
 
 float scale_mod = 1.0f;
 
@@ -74,7 +74,7 @@ void Key_Callback(
     if (key == GLFW_KEY_S && action == GLFW_RELEASE)
         isMovingDown = false;
     
-    if (key == GLFW_KEY_F && action == GLFW_PRESS)
+    /*if (key == GLFW_KEY_F && action == GLFW_PRESS)
         r_mod -= 1.f;
     if (key == GLFW_KEY_G && action == GLFW_PRESS)
         g_mod -= 1.f;
@@ -85,7 +85,7 @@ void Key_Callback(
     if (key == GLFW_KEY_G && action == GLFW_RELEASE)
         g_mod += 1.f;
     if (key == GLFW_KEY_H && action == GLFW_RELEASE)
-        b_mod += 1.f;
+        b_mod += 1.f;*/
 
     if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
         isRotatingRight = true;
@@ -131,10 +131,10 @@ void scroll_callback(
     isMovingFront = false;
     isMovingBack = false;
     if (yoffset < 0)
-        z_mod -= 0.05f;
+        z_mod -= speed;
         //isMovingBack = true;
     if (yoffset > 0)
-        z_mod += 0.05f;
+        z_mod += speed;
         //isMovingFront = true;
 }
 
@@ -251,7 +251,7 @@ int main(void)
     glLinkProgram(shaderProgram);
 
     // Bunny Object elements
-    std::string path = "../3D/myCube.obj";
+    std::string path = "../3D/djSword.obj";
     std::vector<tinyobj::shape_t> shape;
     std::vector<tinyobj::material_t> material;
     std::string warning, error;
@@ -273,42 +273,69 @@ int main(void)
         );
     }
 
-    GLfloat UV[]{
-        0.f, 2.f,
-        0.f, 0.f,
-        2.f, 2.f,
-        2.f, 0.f,
-        2.f, 2.f,
-        2.f, 0.f,
-        0.f, 2.f,
-        0.f, 0.f
-    };
+    //GLfloat UV[]{
+    //    0.f, 2.f,
+    //    0.f, 0.f,
+    //    2.f, 2.f,
+    //    2.f, 0.f,
+    //    2.f, 2.f,
+    //    2.f, 0.f,
+    //    0.f, 2.f,
+    //    0.f, 0.f
+    //};
 
-    GLfloat vertices[]{
-      // x,    y,    z
-        0.0f, 0.5f, 0.0f, // Vertex 0
-        -0.5f, -0.5f, 0.f,// Vertex 1
-        0.5f, -0.5f, 0.f  // Vertex 2
-    };
+    //GLfloat vertices[]{
+    //  // x,    y,    z
+    //    0.0f, 0.5f, 0.0f, // Vertex 0
+    //    -0.5f, -0.5f, 0.f,// Vertex 1
+    //    0.5f, -0.5f, 0.f  // Vertex 2
+    //};
 
-    GLuint indices[]{
-        0, 1, 2
-    };
+    //GLuint indices[]{
+    //    0, 1, 2
+    //};
+    
+    // Loading the UV data of the object.
+    std::vector<GLfloat> fullVertexData;
+    for (int i = 0; i < shape[0].mesh.indices.size(); i++) {
+        tinyobj::index_t vData = shape[0].mesh.indices[i];
 
-    GLuint VAO, VBO, EBO, VBO_UV;
+        // This will generate an array with 3 consecutive points 
+        // as a position coordinate ordered in the vector.
+        // X
+        fullVertexData.push_back(attributes.vertices[vData.vertex_index * 3]);
+        // Y
+        fullVertexData.push_back(attributes.vertices[vData.vertex_index * 3 + 1]);
+        // Z
+        fullVertexData.push_back(attributes.vertices[vData.vertex_index * 3 + 2]);
+
+        // Add normals here
+        //fullVertexData.push_back(attributes.vertices[vData.normal_index * 3]);
+
+        // UV
+        fullVertexData.push_back(attributes.texcoords[vData.texcoord_index * 2]);
+        fullVertexData.push_back(attributes.texcoords[vData.texcoord_index * 2 + 1]);
+
+        // Result: 3 Pos, 2 UV, 3 Pos, 2 UV, and so on.
+    }
+
+    GLuint VAO, VBO;
+        //EBO, VBO_UV;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    glGenBuffers(1, &VBO_UV); // Generate UV Buffer
-    glGenBuffers(1, &EBO);
+    //glGenBuffers(1, &VBO_UV); // Generate UV Buffer
+    //glGenBuffers(1, &EBO);
 
     // We're working with this VAO.
     glBindVertexArray(VAO);
     // We're working with this VBO.
     glBindBuffer(GL_ARRAY_BUFFER, VBO); // Binds VBO to VAO.
     glBufferData(
-        GL_ARRAY_BUFFER, 
-        sizeof(GLfloat) * attributes.vertices.size(),
-        &attributes.vertices[0],
+        GL_ARRAY_BUFFER,
+        sizeof(GLfloat) * fullVertexData.size(),
+        fullVertexData.data(),
+        /*sizeof(GLfloat) * attributes.vertices.size(),
+        &attributes.vertices[0],*/
         /*sizeof(vertices), 
         vertices, */
         GL_STATIC_DRAW //GL_DYNAMIC_DRAW
@@ -320,50 +347,61 @@ int main(void)
         3, // XYZ
         GL_FLOAT, // Type of array
         GL_FALSE, // If need normalize, TRUE
-        3 * sizeof(GL_FLOAT), // Size of the vertex data
+        //XYZ UV (change from 3 to 5)
+        5 * sizeof(GL_FLOAT), // Size of the vertex data
         (void*)0
     );
-    glEnableVertexAttribArray(0);
 
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        sizeof(GLuint) * mesh_indices.size(),
-        mesh_indices.data(),
-        //sizeof(indices), 
-        //indices,
-        GL_STATIC_DRAW
-    );
-
-    // Bind the UV Buffer
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_UV);
-    // Add in the buffer data
-    glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(GLfloat) * (sizeof(UV) / sizeof(UV[0])), //float * size of the UV array
-                 &UV[0], // The UV array earlier
-                 GL_DYNAMIC_DRAW
-    );
-    // How to interpret array above:
+    GLintptr uvPtr = 3 * sizeof(float);
     glVertexAttribPointer(
-        2, // Index 2 for UV
-        2, // UV
+        2,
+        2,
         GL_FLOAT,
         GL_FALSE,
-        2 * sizeof(float),
-        (void*)0
+        5 * sizeof(GLfloat),
+        (void*)uvPtr
     );
+
+    glEnableVertexAttribArray(0);
+
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    //glBufferData(
+    //    GL_ELEMENT_ARRAY_BUFFER,
+    //    sizeof(GLuint) * mesh_indices.size(),
+    //    mesh_indices.data(),
+    //    //sizeof(indices), 
+    //    //indices,
+    //    GL_STATIC_DRAW
+    //);
+
+    //// Bind the UV Buffer
+    //glBindBuffer(GL_ARRAY_BUFFER, VBO_UV);
+    //// Add in the buffer data
+    //glBufferData(GL_ARRAY_BUFFER,
+    //             sizeof(GLfloat) * (sizeof(UV) / sizeof(UV[0])), //float * size of the UV array
+    //             &UV[0], // The UV array earlier
+    //             GL_DYNAMIC_DRAW
+    //);
+    //// How to interpret array above:
+    //glVertexAttribPointer(
+    //    2, // Index 2 for UV
+    //    2, // UV
+    //    GL_FLOAT,
+    //    GL_FALSE,
+    //    2 * sizeof(float),
+    //    (void*)0
+    //);
+
     glEnableVertexAttribArray(2); // 2 for UV / Texture
     // Clean Up
     glBindBuffer(GL_ARRAY_BUFFER, 0); // Wala nang ginagalaw sa VBO.
 
-
     glBindVertexArray(0); // Wala ka nang ginagalaw na VAO.
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // EBO
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // EBO
 
     // Creating identity matrices
-    glm::mat3 identity_matrix3 = glm::mat3(1.0f);
-    glm::mat4 identity_matrix4 = glm::mat4(1.0f);
+    /*glm::mat3 identity_matrix3 = glm::mat3(1.0f);
+    glm::mat4 identity_matrix4 = glm::mat4(1.0f);*/
 
     // Creating an orthographic view.
     //glm::mat4 projection = glm::ortho(-2.f, 2.f, -2.f, 2.f, -1.f, 1.f); // left most point, right most point, bottom most point, top most point, z near, z far
@@ -425,10 +463,10 @@ int main(void)
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
         
         /* * * * * * * * * * * * * * * * * UPDATE * * * * * * * * * * * * * * * * */
-        if (isMovingUp) y_mod += speed;
-        if (isMovingDown) y_mod -= speed;
-        if (isMovingLeft) x_mod += speed;
-        if (isMovingRight) x_mod -= speed;
+        if (isMovingUp) y_mod -= speed;
+        if (isMovingDown) y_mod += speed;
+        if (isMovingLeft) x_mod -= speed;
+        if (isMovingRight) x_mod += speed;
 
         if (isScalingUp) scale_mod += speed;
         if (isScalingDown && scale_mod >= 0.05f) scale_mod -= speed;
@@ -441,12 +479,12 @@ int main(void)
         if (isRotatingRight) yrot_mod += 5.f;
         if (isRotatingLeft) yrot_mod -= 5.f;
 
-        unsigned int rCol = glGetUniformLocation(shaderProgram, "r");
+        /*unsigned int rCol = glGetUniformLocation(shaderProgram, "r");
         glUniform1f(rCol, r_mod);
         unsigned int gCol = glGetUniformLocation(shaderProgram, "g");
         glUniform1f(gCol, g_mod);
         unsigned int bCol = glGetUniformLocation(shaderProgram, "b");
-        glUniform1f(bCol, b_mod);
+        glUniform1f(bCol, b_mod);*/
 
         projection = glm::perspective(
             glm::radians(fov_mod), // FOV
@@ -460,7 +498,7 @@ int main(void)
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(tex0Address, 0);
         /* * * * * * * * * * * * * * * * * * * */
-        glm::mat4 transformation_matrix = glm::translate(identity_matrix4,
+        glm::mat4 transformation_matrix = glm::translate(glm::mat4(1.0f),
             glm::vec3(0, y_mod, z_mod));
 
         transformation_matrix = glm::scale(transformation_matrix,
@@ -510,13 +548,14 @@ int main(void)
         //glDrawArrays(GL_TRIANGLES, 0, 3);
         glUseProgram(shaderProgram);
 
-        glDrawElements(
-            GL_TRIANGLES,
-            //sizeof(indices),
-            mesh_indices.size(),
-            GL_UNSIGNED_INT,
-            0
-        );
+        //glDrawElements(
+        //    GL_TRIANGLES,
+        //    //sizeof(indices),
+        //    mesh_indices.size(),
+        //    GL_UNSIGNED_INT,
+        //    0
+        //);
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / 5);
 
         /*float length = 0.3f;
         float angle, x, y;
@@ -543,7 +582,7 @@ int main(void)
     // Clean up
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    //glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;
