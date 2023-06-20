@@ -22,7 +22,7 @@ float z_mod = -50.f;
 //float g_mod = 0;
 //float b_mod = 0;
 
-float scale_mod = 1.0f;
+float scale_mod = 0.5f;
 
 float xrot_mod = 0.f;
 float yrot_mod = 0.f;
@@ -168,7 +168,7 @@ int main(void)
     // Fix the flipped texture (by default it is flipped).
     stbi_set_flip_vertically_on_load(true);
     // Load the texture and fill out the variables.
-    unsigned char* text_bytes = stbi_load("../3D/ayaya.png", // Texture path
+    unsigned char* text_bytes = stbi_load("../3D/peop.png", // Texture path
                                           &img_width, // Width of the texture
                                           &img_height, // height of the texture
                                           &color_channels, // color channel
@@ -310,7 +310,12 @@ int main(void)
         fullVertexData.push_back(attributes.vertices[vData.vertex_index * 3 + 2]);
 
         // Add normals here
-        //fullVertexData.push_back(attributes.vertices[vData.normal_index * 3]);
+        // X
+        fullVertexData.push_back(attributes.normals[vData.vertex_index * 3]);
+        // Y
+        fullVertexData.push_back(attributes.normals[vData.vertex_index * 3 + 1]);
+        // Z
+        fullVertexData.push_back(attributes.normals[vData.vertex_index * 3 + 2]);
 
         // UV
         fullVertexData.push_back(attributes.texcoords[vData.texcoord_index * 2]);
@@ -347,18 +352,18 @@ int main(void)
         3, // XYZ
         GL_FLOAT, // Type of array
         GL_FALSE, // If need normalize, TRUE
-        //XYZ UV (change from 3 to 5)
-        5 * sizeof(GL_FLOAT), // Size of the vertex data
+        //XYZ normals UV (change from 3 to 5)
+        (5 + 3) * sizeof(GL_FLOAT), // Size of the vertex data
         (void*)0
     );
 
-    GLintptr uvPtr = 3 * sizeof(float);
+    GLintptr uvPtr = 6 * sizeof(float);
     glVertexAttribPointer(
         2,
         2,
         GL_FLOAT,
         GL_FALSE,
-        5 * sizeof(GLfloat),
+        8 * sizeof(GLfloat),
         (void*)uvPtr
     );
 
@@ -435,7 +440,7 @@ int main(void)
         glm::mat4 cameraPosMatrix = glm::translate(glm::mat4(1.0f), 
                                                    cameraPos * -1.f);
         glm::vec3 worldUp = glm::normalize(glm::vec3(0, 1.f, 0));
-        glm::vec3 cameraCenter = glm::vec3(x_mod, 3.0f, 0);
+        glm::vec3 cameraCenter = glm::vec3(x_mod, 0.0f, 0);
 
         // Making the vectors of the camera. ---- if not using lookAt().
         glm::vec3 F = (cameraCenter - cameraPos); // Forward Vector
@@ -478,6 +483,9 @@ int main(void)
         if (isRotatingDown) xrot_mod -= 5.f;
         if (isRotatingRight) yrot_mod += 5.f;
         if (isRotatingLeft) yrot_mod -= 5.f;
+
+        // idle
+        yrot_mod += 1.f;
 
         /*unsigned int rCol = glGetUniformLocation(shaderProgram, "r");
         glUniform1f(rCol, r_mod);
@@ -555,7 +563,7 @@ int main(void)
         //    GL_UNSIGNED_INT,
         //    0
         //);
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / 5);
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / (5+3));
 
         /*float length = 0.3f;
         float angle, x, y;
