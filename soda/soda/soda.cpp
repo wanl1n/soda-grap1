@@ -17,12 +17,12 @@
 float speed = 0.1f;
 float x_mod = 0;
 float y_mod = 0;
-float z_mod = -50.f;
+float z_mod = -5.f;
 //float r_mod = 0;
 //float g_mod = 0;
 //float b_mod = 0;
 
-float scale_mod = 0.5f;
+float scale_mod = 0.1f;
 
 float xrot_mod = 0.f;
 float yrot_mod = 0.f;
@@ -46,6 +46,8 @@ bool isScalingDown = false;
 
 bool isZoomingIn = false;
 bool isZoomingOut = false;
+
+bool isChangeLight = false;
 
 void Key_Callback(
     GLFWwindow* window,
@@ -121,6 +123,11 @@ void Key_Callback(
         isZoomingOut = true;
     if (key == GLFW_KEY_X && action == GLFW_RELEASE)
         isZoomingOut = false;
+
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+        isChangeLight = true;
+    if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE)
+        isChangeLight = false;
 }
 
 void scroll_callback(
@@ -311,17 +318,17 @@ int main(void)
 
         // Add normals here
         // X
-        fullVertexData.push_back(attributes.normals[vData.vertex_index * 3]);
+        fullVertexData.push_back(attributes.normals[vData.normal_index * 3]);
         // Y
-        fullVertexData.push_back(attributes.normals[vData.vertex_index * 3 + 1]);
+        fullVertexData.push_back(attributes.normals[vData.normal_index * 3 + 1]);
         // Z
-        fullVertexData.push_back(attributes.normals[vData.vertex_index * 3 + 2]);
+        fullVertexData.push_back(attributes.normals[vData.normal_index * 3 + 2]);
 
         // UV
         fullVertexData.push_back(attributes.texcoords[vData.texcoord_index * 2]);
         fullVertexData.push_back(attributes.texcoords[vData.texcoord_index * 2 + 1]);
 
-        // Result: 3 Pos, 2 UV, 3 Pos, 2 UV, and so on.
+        // Result: 3 Pos, 3 Norm, 2 UV, 3 Pos, 3 Norm, 2 UV, and so on.
     }
 
     GLuint VAO, VBO;
@@ -357,6 +364,16 @@ int main(void)
         (void*)0
     );
 
+    GLintptr normPtr = 3 * sizeof(float);
+    glVertexAttribPointer(
+        1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GLfloat),
+        (void*)normPtr
+    );
+
     GLintptr uvPtr = 6 * sizeof(float);
     glVertexAttribPointer(
         2,
@@ -368,6 +385,8 @@ int main(void)
     );
 
     glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1); // for Normals
+    glEnableVertexAttribArray(2); // 2 for UV / Texture
 
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     //glBufferData(
@@ -397,7 +416,6 @@ int main(void)
     //    (void*)0
     //);
 
-    glEnableVertexAttribArray(2); // 2 for UV / Texture
     // Clean Up
     glBindBuffer(GL_ARRAY_BUFFER, 0); // Wala nang ginagalaw sa VBO.
 
@@ -427,6 +445,17 @@ int main(void)
     //glm::mat4 rotation = glm::rotate(identity_matrix4,
     //                                 glm::radians(theta),
     //                                 glm::vec3(x, y, z));
+
+    // Position of light
+    glm::vec3 lightPos = glm::vec3(-10, 3, 0);
+    // Light Color
+    glm::vec3 lightColor = glm::vec3(1, 0.75f, 0.8f);
+    // Ambient light strength
+    float ambientStr = 0.1f;
+    glm::vec3 ambientColor = lightColor;
+    //Specular Light
+    float specStr = 0.5f;
+    float specPhong = 16;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -484,8 +513,11 @@ int main(void)
         if (isRotatingRight) yrot_mod += 5.f;
         if (isRotatingLeft) yrot_mod -= 5.f;
 
+        if (isChangeLight) lightColor = glm::vec3(1, 1, 1);
+        if (!isChangeLight) lightColor = glm::vec3(1, 0.75f, 0.8f);
+
         // idle
-        yrot_mod += 1.f;
+        yrot_mod += 0.5f;
 
         /*unsigned int rCol = glGetUniformLocation(shaderProgram, "r");
         glUniform1f(rCol, r_mod);
@@ -551,6 +583,23 @@ int main(void)
         );
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+        // LIGHTING
+        GLuint lightAddress = glGetUniformLocation(shaderProgram, "lightPos");
+        glUniform3fv(lightAddress, 1, glm::value_ptr(lightPos));
+        GLuint lightColorAddress = glGetUniformLocation(shaderProgram, "lightColor");
+        glUniform3fv(lightColorAddress, 1, glm::value_ptr(lightColor));
+        
+        GLuint ambientStrAddress = glGetUniformLocation(shaderProgram, "ambientStr");
+        glUniform1f(ambientStrAddress, ambientStr);
+        GLuint ambientColorAddress = glGetUniformLocation(shaderProgram, "ambientColor");
+        glUniform3fv(ambientColorAddress, 1, glm::value_ptr(ambientColor));
+
+        GLuint cameraPosAddress = glGetUniformLocation(shaderProgram, "cameraPos");
+        glUniform3fv(cameraPosAddress, 1, glm::value_ptr(cameraPos));
+        GLuint specStrAddress = glGetUniformLocation(shaderProgram, "specStr");
+        glUniform1f(specStrAddress, specStr);
+        GLuint specPhongAddress = glGetUniformLocation(shaderProgram, "specPhong");
+        glUniform1f(specPhongAddress, specPhong);
 
         glBindVertexArray(VAO);
         //glDrawArrays(GL_TRIANGLES, 0, 3);
