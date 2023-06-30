@@ -15,14 +15,14 @@
 #include <iostream>
 
 float speed = 0.1f;
-float x_mod = 0;
+float x_mod = -10;
 float y_mod = 0;
-float z_mod = -5.f;
+float z_mod = -10.f;
 //float r_mod = 0;
 //float g_mod = 0;
 //float b_mod = 0;
 
-float scale_mod = 0.1f;
+float scale_mod = 0.05f;
 
 float xrot_mod = 0.f;
 float yrot_mod = 0.f;
@@ -175,7 +175,7 @@ int main(void)
     // Fix the flipped texture (by default it is flipped).
     stbi_set_flip_vertically_on_load(true);
     // Load the texture and fill out the variables.
-    unsigned char* text_bytes = stbi_load("../3D/peop.png", // Texture path
+    unsigned char* text_bytes = stbi_load("../3D/BananaCat_vertexcolor.png", // Texture path
                                           &img_width, // Width of the texture
                                           &img_height, // height of the texture
                                           &color_channels, // color channel
@@ -258,7 +258,7 @@ int main(void)
     glLinkProgram(shaderProgram);
 
     // Bunny Object elements
-    std::string path = "../3D/djSword.obj";
+    std::string path = "../3D/banancat.obj";
     std::vector<tinyobj::shape_t> shape;
     std::vector<tinyobj::material_t> material;
     std::string warning, error;
@@ -457,6 +457,8 @@ int main(void)
     float specStr = 0.5f;
     float specPhong = 16;
 
+    float intensityMultiplier = 10;
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -465,11 +467,11 @@ int main(void)
         
         /* * * * * * * * * * * * SETTING UP THE VIEW MATRIX * * * * * * * * * * * */
         // Making the camera variables and setting up.
-        glm::vec3 cameraPos = glm::vec3(x_mod, 0, 10.f);
+        glm::vec3 cameraPos = glm::vec3(0, 0, 10.f);
         glm::mat4 cameraPosMatrix = glm::translate(glm::mat4(1.0f), 
                                                    cameraPos * -1.f);
         glm::vec3 worldUp = glm::normalize(glm::vec3(0, 1.f, 0));
-        glm::vec3 cameraCenter = glm::vec3(x_mod, 0.0f, 0);
+        glm::vec3 cameraCenter = glm::vec3(0, 0.0f, 0);
 
         // Making the vectors of the camera. ---- if not using lookAt().
         glm::vec3 F = (cameraCenter - cameraPos); // Forward Vector
@@ -497,8 +499,8 @@ int main(void)
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
         
         /* * * * * * * * * * * * * * * * * UPDATE * * * * * * * * * * * * * * * * */
-        if (isMovingUp) y_mod -= speed;
-        if (isMovingDown) y_mod += speed;
+        if (isMovingUp) intensityMultiplier += speed;
+        if (isMovingDown) intensityMultiplier -= speed;
         if (isMovingLeft) x_mod -= speed;
         if (isMovingRight) x_mod += speed;
 
@@ -513,11 +515,14 @@ int main(void)
         if (isRotatingRight) yrot_mod += 5.f;
         if (isRotatingLeft) yrot_mod -= 5.f;
 
-        if (isChangeLight) lightColor = glm::vec3(1, 1, 1);
-        if (!isChangeLight) lightColor = glm::vec3(1, 0.75f, 0.8f);
+        /*if (isChangeLight) lightColor = glm::vec3(1, 1, 1);
+        if (!isChangeLight) lightColor = glm::vec3(1, 0.75f, 0.8f);*/
+        if (isChangeLight) intensityMultiplier = 0;
+        if (!isChangeLight) intensityMultiplier = 10;
+        lightPos = glm::vec3(x_mod, 3, 0);
 
         // idle
-        yrot_mod += 0.5f;
+        //yrot_mod += 0.5f;
 
         /*unsigned int rCol = glGetUniformLocation(shaderProgram, "r");
         glUniform1f(rCol, r_mod);
@@ -539,7 +544,7 @@ int main(void)
         glUniform1i(tex0Address, 0);
         /* * * * * * * * * * * * * * * * * * * */
         glm::mat4 transformation_matrix = glm::translate(glm::mat4(1.0f),
-            glm::vec3(0, y_mod, z_mod));
+            glm::vec3(0, -1.f, 0));
 
         transformation_matrix = glm::scale(transformation_matrix,
             glm::vec3(scale_mod, scale_mod, scale_mod));
@@ -600,6 +605,12 @@ int main(void)
         glUniform1f(specStrAddress, specStr);
         GLuint specPhongAddress = glGetUniformLocation(shaderProgram, "specPhong");
         glUniform1f(specPhongAddress, specPhong);
+
+        float distance = sqrt(lightPos.x * lightPos.x + lightPos.y * lightPos.y + lightPos.z * lightPos.z);
+        GLuint distanceAddress = glGetUniformLocation(shaderProgram, "dist");
+        glUniform1f(distanceAddress, distance);
+        GLuint intensityMultiplierAddress = glGetUniformLocation(shaderProgram, "intensityMult");
+        glUniform1f(intensityMultiplierAddress, intensityMultiplier);
 
         glBindVertexArray(VAO);
         //glDrawArrays(GL_TRIANGLES, 0, 3);
