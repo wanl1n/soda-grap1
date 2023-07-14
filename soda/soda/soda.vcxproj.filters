@@ -31,7 +31,31 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Shaders\sample.frag" />
-    <None Include="..\Shaders\sample.vert" />
+    <None Include="Shaders\sample.frag" />
+    <None Include="Shaders\sample.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="Shaders\skybox.frag" />
+    <CopyFileToFolders Include="Shaders\skybox.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Skybox\rainbow_bk.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Skybox\rainbow_dn.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Skybox\rainbow_ft.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Skybox\rainbow_lf.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Skybox\rainbow_rt.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Skybox\rainbow_up.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

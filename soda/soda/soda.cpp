@@ -175,7 +175,7 @@ int main(void)
     // Fix the flipped texture (by default it is flipped).
     stbi_set_flip_vertically_on_load(true);
     // Load the texture and fill out the variables.
-    unsigned char* text_bytes = stbi_load("../3D/BananaCat_vertexcolor.png", // Texture path
+    unsigned char* text_bytes = stbi_load("3D/BananaCat_vertexcolor.png", // Texture path
                                           &img_width, // Width of the texture
                                           &img_height, // height of the texture
                                           &color_channels, // color channel
@@ -226,14 +226,14 @@ int main(void)
     glfwSetScrollCallback(window, scroll_callback);
 
     // Vertex shader for positioning
-    std::fstream vertSrc("../Shaders/sample.vert");
+    std::fstream vertSrc("Shaders/sample.vert");
     std::stringstream vertBuff;
     vertBuff << vertSrc.rdbuf();
     std::string vertS = vertBuff.str();
     const char* v = vertS.c_str();
 
     // Fragment shader for coloring
-    std::fstream fragSrc("../Shaders/sample.frag");
+    std::fstream fragSrc("Shaders/sample.frag");
     std::stringstream fragBuff;
     fragBuff << fragSrc.rdbuf();
     std::string fragS = fragBuff.str();
@@ -257,8 +257,43 @@ int main(void)
     // Links the shader to the program.
     glLinkProgram(shaderProgram);
 
+    // Vertex shader for positioning
+    std::fstream sky_vertSrc("Shaders/skybox.vert");
+    std::stringstream sky_vertBuff;
+    sky_vertBuff << sky_vertSrc.rdbuf();
+    std::string sky_vertS = sky_vertBuff.str();
+    const char* sky_v = sky_vertS.c_str();
+
+    // Fragment shader for coloring
+    std::fstream sky_fragSrc("Shaders/skybox.frag");
+    std::stringstream sky_fragBuff;
+    sky_fragBuff << sky_fragSrc.rdbuf();
+    std::string sky_fragS = sky_fragBuff.str();
+    const char* sky_f = sky_fragS.c_str();
+
+    // Creating the vertex shader for use in the program.
+    GLuint sky_vertShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(sky_vertShader, 1, &sky_v, NULL);
+    glCompileShader(sky_vertShader);
+
+    // Creating the fragment shader for use in the program.
+    GLuint sky_fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(sky_fragShader, 1, &sky_f, NULL);
+    glCompileShader(sky_fragShader);
+
+    // Creating the shader program.
+    GLuint skyboxProgram = glCreateProgram();
+    glAttachShader(skyboxProgram, sky_vertShader);
+    glAttachShader(skyboxProgram, sky_fragShader);
+
+    // Links the shader to the program.
+    glLinkProgram(skyboxProgram);
+
+    glDeleteShader(sky_vertShader);
+    glDeleteShader(sky_fragShader);
+
     // Bunny Object elements
-    std::string path = "../3D/banancat.obj";
+    std::string path = "3D/banancat.obj";
     std::vector<tinyobj::shape_t> shape;
     std::vector<tinyobj::material_t> material;
     std::string warning, error;
@@ -272,6 +307,103 @@ int main(void)
         &error,
         path.c_str()
     );
+
+    /*
+      7--------6
+     /|       /|
+    4--------5 |
+    | |      | |
+    | 3------|-2
+    |/       |/
+    0--------1
+    */
+    //Vertices for the cube
+    float skyboxVertices[]{
+        -1.f, -1.f, 1.f, //0
+        1.f, -1.f, 1.f,  //1
+        1.f, -1.f, -1.f, //2
+        -1.f, -1.f, -1.f,//3
+        -1.f, 1.f, 1.f,  //4
+        1.f, 1.f, 1.f,   //5
+        1.f, 1.f, -1.f,  //6
+        -1.f, 1.f, -1.f  //7
+    };
+
+    //Skybox Indices
+    unsigned int skyboxIndices[]{
+        1,2,6,
+        6,5,1,
+
+        0,4,7,
+        7,3,0,
+
+        4,5,6,
+        6,7,4,
+
+        0,3,2,
+        2,1,0,
+
+        0,1,5,
+        5,4,0,
+
+        3,7,6,
+        6,2,3
+    };
+
+    unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
+    glGenVertexArrays(1, &skyboxVAO);
+    glGenBuffers(1, &skyboxVBO);
+    glGenBuffers(1, &skyboxEBO);
+
+    glBindVertexArray(skyboxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GL_FLOAT), (void*)0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(skyboxIndices), &skyboxIndices, GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+
+    // Order is particular (right, left, up, down, front, back)
+    std::string facesSkybox[]{
+        "Skybox/rainbow_rt.png", // Start with right face
+        "Skybox/rainbow_lf.png",
+        "Skybox/rainbow_up.png",
+        "Skybox/rainbow_dn.png",
+        "Skybox/rainbow_ft.png",
+        "Skybox/rainbow_bk.png"
+    };
+
+    unsigned int skyboxTex;
+    glGenTextures(1, &skyboxTex);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
+
+    // Avoid pixelation
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // Reduce pixelation as much if the texture is too big
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // Reduce pixelation as much if the texture is too small
+
+    // 3d cube on all axes clamp.
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); // To prevent tiling
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // To prevent tiling
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // To prevent tiling
+
+    for (unsigned int i = 0; i < 6; i++) {
+        int w, h, skyCChannel;
+        stbi_set_flip_vertically_on_load(false); // dont flip the skybox.
+
+        unsigned char* data = stbi_load(facesSkybox[i].c_str(), &w, &h, &skyCChannel, 0);
+        
+        if (data) {
+            // this png has no alpha channel
+            // cubemap face address starts at the right (positive x)
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        }
+
+        stbi_image_free(data);
+    }
+
+    stbi_set_flip_vertically_on_load(true);
 
     std::vector<GLuint> mesh_indices;
     for (int i = 0; i < shape[0].mesh.indices.size(); i++) {
@@ -309,20 +441,14 @@ int main(void)
 
         // This will generate an array with 3 consecutive points 
         // as a position coordinate ordered in the vector.
-        // X
-        fullVertexData.push_back(attributes.vertices[vData.vertex_index * 3]);
-        // Y
-        fullVertexData.push_back(attributes.vertices[vData.vertex_index * 3 + 1]);
-        // Z
-        fullVertexData.push_back(attributes.vertices[vData.vertex_index * 3 + 2]);
+        fullVertexData.push_back(attributes.vertices[vData.vertex_index * 3]);// X
+        fullVertexData.push_back(attributes.vertices[vData.vertex_index * 3 + 1]);// Y
+        fullVertexData.push_back(attributes.vertices[vData.vertex_index * 3 + 2]);// Z
 
         // Add normals here
-        // X
-        fullVertexData.push_back(attributes.normals[vData.normal_index * 3]);
-        // Y
-        fullVertexData.push_back(attributes.normals[vData.normal_index * 3 + 1]);
-        // Z
-        fullVertexData.push_back(attributes.normals[vData.normal_index * 3 + 2]);
+        fullVertexData.push_back(attributes.normals[vData.normal_index * 3]);// X
+        fullVertexData.push_back(attributes.normals[vData.normal_index * 3 + 1]);// Y
+        fullVertexData.push_back(attributes.normals[vData.normal_index * 3 + 2]);// Z
 
         // UV
         fullVertexData.push_back(attributes.texcoords[vData.texcoord_index * 2]);
@@ -468,36 +594,60 @@ int main(void)
         /* * * * * * * * * * * * SETTING UP THE VIEW MATRIX * * * * * * * * * * * */
         // Making the camera variables and setting up.
         glm::vec3 cameraPos = glm::vec3(0, 0, 10.f);
-        glm::mat4 cameraPosMatrix = glm::translate(glm::mat4(1.0f), 
-                                                   cameraPos * -1.f);
+        /*glm::mat4 cameraPosMatrix = glm::translate(glm::mat4(1.0f), cameraPos * -1.f);*/
         glm::vec3 worldUp = glm::normalize(glm::vec3(0, 1.f, 0));
         glm::vec3 cameraCenter = glm::vec3(0, 0.0f, 0);
 
         // Making the vectors of the camera. ---- if not using lookAt().
-        glm::vec3 F = (cameraCenter - cameraPos); // Forward Vector
-        F = glm::normalize(F);
-        glm::vec3 R = glm::cross(F, worldUp); // Right Vector, No need to normalize because F is normalized.
-        glm::vec3 U = glm::cross(R, F); // Up Vector
+        //glm::vec3 F = (cameraCenter - cameraPos); // Forward Vector
+        //F = glm::normalize(F);
+        //glm::vec3 R = glm::cross(F, worldUp); // Right Vector, No need to normalize because F is normalized.
+        //glm::vec3 U = glm::cross(R, F); // Up Vector
 
         // Making the camera orientation matrix. ---- if not using lookAt().
-        glm::mat4 cameraOrientation = glm::mat4(1.0f);
+        /*glm::mat4 cameraOrientation = glm::mat4(1.0f);*/
 
-        // matrix[col][row]
-        cameraOrientation[0][0] = R.x;
-        cameraOrientation[1][0] = R.y;
-        cameraOrientation[2][0] = R.z;
-        cameraOrientation[0][1] = U.x;
-        cameraOrientation[1][1] = U.y;
-        cameraOrientation[2][1] = U.z;
-        cameraOrientation[0][2] = -F.x;
-        cameraOrientation[1][2] = -F.y;
-        cameraOrientation[2][2] = -F.z;
+        //// matrix[col][row]
+        //cameraOrientation[0][0] = R.x;
+        //cameraOrientation[1][0] = R.y;
+        //cameraOrientation[2][0] = R.z;
+        //cameraOrientation[0][1] = U.x;
+        //cameraOrientation[1][1] = U.y;
+        //cameraOrientation[2][1] = U.z;
+        //cameraOrientation[0][2] = -F.x;
+        //cameraOrientation[1][2] = -F.y;
+        //cameraOrientation[2][2] = -F.z;
 
         // Final Computation for the View Matrix.
         //glm::mat4 viewMatrix = cameraOrientation * cameraPosMatrix;
         glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraCenter, worldUp); // For this, no need to make the vectors.
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        glDepthMask(GL_FALSE);
+        glDepthFunc(GL_LEQUAL);
+
+        glUseProgram(skyboxProgram);
         
+        glm::mat4 skyView = glm::mat4(1.f);
+        // Strip off the translation of the camera since we only need the rotation.
+        skyView = glm::mat4(glm::mat3(viewMatrix));
+
+        unsigned int skyProjectionLoc = glGetUniformLocation(skyboxProgram, "projection");
+        glUniformMatrix4fv(skyProjectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+        unsigned int skyViewLoc = glGetUniformLocation(skyboxProgram, "view");
+        glUniformMatrix4fv(skyViewLoc, 1, GL_FALSE, glm::value_ptr(skyView));
+
+        glBindVertexArray(skyboxVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
+
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
+        glUseProgram(shaderProgram);
+
         /* * * * * * * * * * * * * * * * * UPDATE * * * * * * * * * * * * * * * * */
         if (isMovingUp) intensityMultiplier += speed;
         if (isMovingDown) intensityMultiplier -= speed;

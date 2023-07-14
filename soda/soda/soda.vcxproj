@@ -141,8 +141,30 @@
     <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Shaders\sample.frag" />
-    <None Include="..\Shaders\sample.vert" />
+    <CopyFileToFolders Include="Shaders\skybox.frag">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <FileType>Document</FileType>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)Shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)Shaders</DestinationFolders>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="Shaders\skybox.vert">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <FileType>Document</FileType>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)Shaders</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)Shaders</DestinationFolders>
+    </CopyFileToFolders>
+    <None Include="Shaders\sample.frag" />
+    <None Include="Shaders\sample.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Skybox\rainbow_bk.png" />
+    <Image Include="Skybox\rainbow_dn.png" />
+    <Image Include="Skybox\rainbow_ft.png" />
+    <Image Include="Skybox\rainbow_lf.png" />
+    <Image Include="Skybox\rainbow_rt.png" />
+    <Image Include="Skybox\rainbow_up.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
