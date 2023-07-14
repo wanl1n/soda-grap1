@@ -74,7 +74,7 @@ void main() {
 	// Assign the texture color using the function
 	// Apply the light * intensity
 	// Multiply the light and texture with the intensity to make the light dimmer or brighter depending on where it is and how much the multiplier was set.
-	//FragColor = intensity * vec4(diffuse + ambientCol + specColor, 1.0) * texture(tex0, texCoord);
+	FragColor = intensity * vec4(diffuse + ambientCol + specColor, 1.0) * texture(tex0, texCoord);
 
-	FragColor = texture(tex0, texCoord);
+	//FragColor = texture(tex0, texCoord);
 }

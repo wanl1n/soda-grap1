@@ -596,7 +596,7 @@ int main(void)
         glm::vec3 cameraPos = glm::vec3(0, 0, 10.f);
         /*glm::mat4 cameraPosMatrix = glm::translate(glm::mat4(1.0f), cameraPos * -1.f);*/
         glm::vec3 worldUp = glm::normalize(glm::vec3(0, 1.f, 0));
-        glm::vec3 cameraCenter = glm::vec3(0, 0.0f, 0);
+        glm::vec3 cameraCenter = glm::vec3(yrot_mod, xrot_mod, 0);
 
         // Making the vectors of the camera. ---- if not using lookAt().
         //glm::vec3 F = (cameraCenter - cameraPos); // Forward Vector
@@ -660,10 +660,10 @@ int main(void)
         if (isZoomingIn) fov_mod -= speed;
         if (isZoomingOut) fov_mod += speed;
 
-        if (isRotatingUp) xrot_mod += 5.f;
-        if (isRotatingDown) xrot_mod -= 5.f;
-        if (isRotatingRight) yrot_mod += 5.f;
-        if (isRotatingLeft) yrot_mod -= 5.f;
+        if (isRotatingUp) xrot_mod += speed;
+        if (isRotatingDown) xrot_mod -= speed;
+        if (isRotatingRight) yrot_mod += speed;
+        if (isRotatingLeft) yrot_mod -= speed;
 
         /*if (isChangeLight) lightColor = glm::vec3(1, 1, 1);
         if (!isChangeLight) lightColor = glm::vec3(1, 0.75f, 0.8f);*/
@@ -679,7 +679,7 @@ int main(void)
         unsigned int gCol = glGetUniformLocation(shaderProgram, "g");
         glUniform1f(gCol, g_mod);
         unsigned int bCol = glGetUniformLocation(shaderProgram, "b");
-        glUniform1f(bCol, b_mod);*/
+        glUniform1f(bCol, b_mod);
 
         projection = glm::perspective(
             glm::radians(fov_mod), // FOV
