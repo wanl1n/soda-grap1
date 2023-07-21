@@ -14,8 +14,8 @@
 #include <string>
 #include <iostream>
 
-float speed = 0.1f;
-float x_mod = -10;
+float speed = 0.5f;
+float x_mod = 0;
 float y_mod = 0;
 float z_mod = 0.f;
 //float r_mod = 0;
@@ -145,7 +145,7 @@ void scroll_callback(
         //isMovingFront = true;
 }
 
-GLuint LoadImage(const char* path) {
+GLuint LoadImage(const char* path, unsigned int texture_ind) {
     int img_width, img_height, color_channels; // Width, Height, and color channels of the Texture.
 
     // Fix the flipped texture (by default it is flipped).
@@ -162,7 +162,7 @@ GLuint LoadImage(const char* path) {
     // Generate a reference.
     glGenTextures(1, &texture);
     // Set the current texture we're working on to Texture 0.
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(texture_ind);
     // Bind our next tasks to Tex0 to our current reference similar to VBOs.
     glBindTexture(GL_TEXTURE_2D, texture);
     //If you want to set how the texture maps on a different size model
@@ -175,15 +175,22 @@ GLuint LoadImage(const char* path) {
         GL_REPEAT //GL_CLAMP_TO_EDGE for stretch, 
     );
 
+    unsigned int rgb = GL_RGB;
+    if (color_channels == 3) {
+        rgb = GL_RGB;
+    } else if (color_channels == 4) {
+        rgb = GL_RGBA;
+    }
+
     //Assign the loaded texture to the OpenGL reference.
     glTexImage2D(
         GL_TEXTURE_2D,
         0, // Texture 0
-        GL_RGBA, // Target color format of the texture.
+        rgb, // Target color format of the texture.
         img_width, // Texture width
         img_height, // Texture height
         0,
-        GL_RGBA, // Color format of the texture
+        rgb, // Color format of the texture
         GL_UNSIGNED_BYTE,
         text_bytes // loaded texture in bytes
     );
@@ -221,39 +228,8 @@ int main(void)
     glfwMakeContextCurrent(window);
     gladLoadGL();
 
-    GLuint texture = LoadImage("3D/banancat.png");
-    
-    // Loading the normals image.
-    int img_width2, img_height2, color_channels2;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* normal_bytes = stbi_load("3D/bananorm.png",
-        &img_width2,
-        &img_height2,
-        &color_channels2,
-        0);
-
-    // Loading the normal texture
-    GLuint norm_tex;
-    glGenTextures(1, &norm_tex);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, norm_tex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-    // Assigning the normal texture
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGB,
-        img_width2, 
-        img_height2, 
-        0,
-        GL_RGB, 
-        GL_UNSIGNED_BYTE,
-        normal_bytes 
-    );
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(normal_bytes);
+    GLuint texture = LoadImage("3D/banancat.png", GL_TEXTURE0);
+    GLuint norm_tex = LoadImage("3D/bananorm.png", GL_TEXTURE1);
 
     // Enable Depth Testing
     glEnable(GL_DEPTH_TEST);
