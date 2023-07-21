@@ -688,6 +688,12 @@ int main(void)
 
     float intensityMultiplier = 10;
 
+    // Stores the mouse cursor positions.
+    double x_cursor_pos, y_cursor_pos;
+
+    // Initialize the camera position.
+    glm::vec3 cameraPos = glm::vec3(x_mod, y_mod, z_mod);
+
     // Enable Blending
     glEnable(GL_BLEND);
     //Choose a Blending Function
