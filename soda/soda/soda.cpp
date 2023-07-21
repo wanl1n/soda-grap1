@@ -701,10 +701,10 @@ int main(void)
         
         /* * * * * * * * * * * * SETTING UP THE VIEW MATRIX * * * * * * * * * * * */
         // Making the camera variables and setting up.
-        glm::vec3 cameraPos = glm::vec3(0, 0, 10.f);
+        //glm::vec3 cameraPos = glm::vec3(0, 0, 10.f);
         /*glm::mat4 cameraPosMatrix = glm::translate(glm::mat4(1.0f), cameraPos * -1.f);*/
-        glm::vec3 worldUp = glm::normalize(glm::vec3(0, 1.f, 0));
-        glm::vec3 cameraCenter = glm::vec3(0, 0, 0);
+        //glm::vec3 worldUp = glm::normalize(glm::vec3(0, 1.f, 0));
+        //glm::vec3 cameraCenter = glm::vec3(0, 0, 0);
 
         // Making the vectors of the camera. ---- if not using lookAt().
         //glm::vec3 F = (cameraCenter - cameraPos); // Forward Vector
@@ -728,8 +728,54 @@ int main(void)
 
         // Final Computation for the View Matrix.
         //glm::mat4 viewMatrix = cameraOrientation * cameraPosMatrix;
-        glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraCenter, worldUp); // For this, no need to make the vectors.
+        //glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraCenter, worldUp); // For this, no need to make the vectors.
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        /* * * * * ADJUSTING THE CAMERA ACCORDING TO THE MOUSE POSITION * * * * */
+        // Get the position of the cursor in the window.
+        glfwGetCursorPos(window, &x_cursor_pos, &y_cursor_pos);
+
+        // Calculate the position of the mouse with the origin (0, 0) at the center of the window.
+        glm::vec2 mousePos = glm::vec2(x_cursor_pos - (width / 2), y_cursor_pos - (height / 2));
+
+        // Calculate the new camera center coordinates using Polar Coordinates.
+        // Calculating the degree of rotation around the y-axis(yaw) and the x-axis (pitch).
+        // Assuming the screen is a number line from -90 to 90 (to represent the degree of rotation from the center/origin),
+        // First, use linear interpolation to get the relative distance of the mouse cursor position.
+        // Second, multiply it with the new "scale" (-90 to 90) to get the degree.
+        // Third, convert it to radians.
+        float yaw = glm::radians((mousePos.x / (width / 2)) * theta_tot);
+        float pitch = glm::radians((mousePos.y / (height / 2)) * theta_tot);
+
+        // Limiting the degree in case of flipping.
+        if (yaw > 89.9f) yaw = 89.9f;
+        if (yaw < -89.9f) yaw = -89.9f;
+        if (pitch > 89.9f) pitch = 89.9f;
+        if (pitch < -89.9f) pitch = -89.9f;
+
+        // Finally get the direction in each axis by using Polar to Cartesian point conversion.
+        float xAxisRot = radius * sin(yaw) * cos(pitch);
+        float yAxisRot = radius * sin(pitch);
+        float zAxisRot = radius * cos(yaw) * cos(pitch);
+
+        // Update the camera center with the new calculated point.
+        // Finally, make sure to add the strafing movement of the camera to the x-axis.
+        glm::vec3 cameraCenter = glm::vec3(xAxisRot, yAxisRot, zAxisRot);
+
+        // Next, calculate the position change based on where the camera center is.
+        glm::vec3 worldUp = glm::normalize(glm::vec3(0, 1.f, 0));
+
+        // If moving sideways, add or subtract the normalized right vector of the camera to move the camera position sideways.
+        if (isMovingLeft) cameraPos -= glm::normalize(glm::cross(cameraCenter, worldUp)) * 0.5f;
+        if (isMovingRight) cameraPos += glm::normalize(glm::cross(cameraCenter, worldUp)) * 0.5f;
+        // If moving forward or back, go towards or away from the camera center.
+        if (isMovingForward) cameraPos += speed * (cameraCenter);
+        if (isMovingBack) cameraPos -= speed * (cameraCenter);
+
+        // Create the view matrix.
+        glm::mat4 viewMatrix = glm::lookAt(cameraPos,
+            cameraPos + cameraCenter, // to make sure cameracenter is always infront of camera pos.
+            worldUp);
 
         glDepthMask(GL_FALSE);
         glDepthFunc(GL_LEQUAL);
