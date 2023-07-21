@@ -17,7 +17,7 @@
 float speed = 0.1f;
 float x_mod = -10;
 float y_mod = 0;
-float z_mod = -10.f;
+float z_mod = 0.f;
 //float r_mod = 0;
 //float g_mod = 0;
 //float b_mod = 0;
@@ -145,41 +145,18 @@ void scroll_callback(
         //isMovingFront = true;
 }
 
-int main(void)
-{
-    GLFWwindow* window;
-    // Center of window is 0,0
-    // Sides are 1 or -1.
-
-    /* Initialize the library */
-    if (!glfwInit())
-        return -1;
-
-    float height = 600.0f;
-    float width = 600.0f;
-
-    /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(height, width, "Kate Nicole Young", NULL, NULL);
-    if (!window)
-    {
-        glfwTerminate();
-        return -1;
-    }
-
-    /* Make the window's context current */
-    glfwMakeContextCurrent(window);
-    gladLoadGL();
-
+GLuint LoadImage(const char* path) {
     int img_width, img_height, color_channels; // Width, Height, and color channels of the Texture.
 
     // Fix the flipped texture (by default it is flipped).
     stbi_set_flip_vertically_on_load(true);
     // Load the texture and fill out the variables.
-    unsigned char* text_bytes = stbi_load("3D/BananaCat_vertexcolor.png", // Texture path
-                                          &img_width, // Width of the texture
-                                          &img_height, // height of the texture
-                                          &color_channels, // color channel
-                                          0);
+    unsigned char* text_bytes = stbi_load(path, // Texture path
+        &img_width, // Width of the texture
+        &img_height, // height of the texture
+        &color_channels, // color channel
+        0);
+
     // OpenGL reference to the texture.
     GLuint texture;
     // Generate a reference.
@@ -205,9 +182,9 @@ int main(void)
         GL_RGBA, // Target color format of the texture.
         img_width, // Texture width
         img_height, // Texture height
-        0, 
+        0,
         GL_RGBA, // Color format of the texture
-        GL_UNSIGNED_BYTE, 
+        GL_UNSIGNED_BYTE,
         text_bytes // loaded texture in bytes
     );
 
@@ -215,6 +192,68 @@ int main(void)
     glGenerateMipmap(GL_TEXTURE_2D);
     // Free up the loaded bytes.
     stbi_image_free(text_bytes);
+
+    return texture;
+}
+
+int main(void)
+{
+    GLFWwindow* window;
+    // Center of window is 0,0
+    // Sides are 1 or -1.
+
+    /* Initialize the library */
+    if (!glfwInit())
+        return -1;
+
+    float height = 600.0f;
+    float width = 600.0f;
+
+    /* Create a windowed mode window and its OpenGL context */
+    window = glfwCreateWindow(height, width, "Kate Nicole Young", NULL, NULL);
+    if (!window)
+    {
+        glfwTerminate();
+        return -1;
+    }
+
+    /* Make the window's context current */
+    glfwMakeContextCurrent(window);
+    gladLoadGL();
+
+    GLuint texture = LoadImage("3D/banancat.png");
+    
+    // Loading the normals image.
+    int img_width2, img_height2, color_channels2;
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* normal_bytes = stbi_load("3D/bananorm.png",
+        &img_width2,
+        &img_height2,
+        &color_channels2,
+        0);
+
+    // Loading the normal texture
+    GLuint norm_tex;
+    glGenTextures(1, &norm_tex);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, norm_tex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+    // Assigning the normal texture
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGB,
+        img_width2, 
+        img_height2, 
+        0,
+        GL_RGB, 
+        GL_UNSIGNED_BYTE,
+        normal_bytes 
+    );
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(normal_bytes);
 
     // Enable Depth Testing
     glEnable(GL_DEPTH_TEST);
@@ -433,6 +472,63 @@ int main(void)
     //GLuint indices[]{
     //    0, 1, 2
     //};
+
+    //Vector to hold our tangents
+    std::vector<glm::vec3> tangents;
+    //Vector to hold our bitangents
+    std::vector<glm::vec3> bitangents;
+
+    for(int i = 0; i < shape[0].mesh.indices.size(); i += 3) {
+
+        // Get the 3 vertex data for the triangle
+        tinyobj::index_t vData1 = shape[0].mesh.indices[i];
+        tinyobj::index_t vData2 = shape[0].mesh.indices[i+1];
+        tinyobj::index_t vData3 = shape[0].mesh.indices[i+2];
+
+        // Position of vertex 1
+        glm::vec3 v1 = glm::vec3(attributes.vertices[vData1.vertex_index * 3],
+                                attributes.vertices[vData1.vertex_index * 3] + 1,
+                                attributes.vertices[vData1.vertex_index * 3] + 2);
+        // Position of vertex 2
+        glm::vec3 v2 = glm::vec3(attributes.vertices[vData2.vertex_index * 3],
+                                attributes.vertices[vData2.vertex_index * 3] + 1,
+                                attributes.vertices[vData2.vertex_index * 3] + 2);
+        //position of vertex 3
+        glm::vec3 v3 = glm::vec3(attributes.vertices[vData3.vertex_index * 3],
+                                attributes.vertices[vData3.vertex_index * 3] + 1,
+                                attributes.vertices[vData3.vertex_index * 3] + 2);
+
+        // Position of uv 1
+        glm::vec2 uv1 = glm::vec2(attributes.texcoords[vData1.texcoord_index * 2],
+                                attributes.texcoords[vData1.texcoord_index * 2] + 1);
+        // Position of uv 2
+        glm::vec2 uv2 = glm::vec2(attributes.texcoords[vData2.texcoord_index * 2],
+                                attributes.texcoords[vData2.texcoord_index * 2] + 1);
+        //position of uv 3
+        glm::vec2 uv3 = glm::vec2(attributes.texcoords[vData3.texcoord_index * 2],
+                                attributes.texcoords[vData3.texcoord_index * 2] + 1);
+
+        glm::vec3 deltaPos1 = v2 - v1;
+        glm::vec3 deltaPos2 = v3 - v1;
+
+        glm::vec2 deltaUV1 = uv2 - uv1;
+        glm::vec2 deltaUV2 = uv3 - uv1;
+
+        float r = 1.0f / ((deltaUV1.x * deltaUV2.y) - (deltaUV1.y * deltaUV2.x));
+
+        // Tangent (T)
+        glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+        // Bitangent (B)
+        glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+
+        tangents.push_back(tangent);
+        tangents.push_back(tangent);
+        tangents.push_back(tangent);
+
+        bitangents.push_back(bitangent);
+        bitangents.push_back(bitangent);
+        bitangents.push_back(bitangent);
+    }
     
     // Loading the UV data of the object.
     std::vector<GLfloat> fullVertexData;
@@ -454,8 +550,16 @@ int main(void)
         fullVertexData.push_back(attributes.texcoords[vData.texcoord_index * 2]);
         fullVertexData.push_back(attributes.texcoords[vData.texcoord_index * 2 + 1]);
 
+        fullVertexData.push_back(tangents[i].x);
+        fullVertexData.push_back(tangents[i].y);
+        fullVertexData.push_back(tangents[i].z);
+
+        fullVertexData.push_back(bitangents[i].x);
+        fullVertexData.push_back(bitangents[i].y);
+        fullVertexData.push_back(bitangents[i].z);
         // Result: 3 Pos, 3 Norm, 2 UV, 3 Pos, 3 Norm, 2 UV, and so on.
     }
+
 
     GLuint VAO, VBO;
         //EBO, VBO_UV;
@@ -485,8 +589,8 @@ int main(void)
         3, // XYZ
         GL_FLOAT, // Type of array
         GL_FALSE, // If need normalize, TRUE
-        //XYZ normals UV (change from 3 to 5)
-        (5 + 3) * sizeof(GL_FLOAT), // Size of the vertex data
+        //XYZ normals UV (change from 3 to 5) add TB
+        (5 + 3 + 6) * sizeof(GL_FLOAT), // Size of the vertex data
         (void*)0
     );
 
@@ -496,7 +600,7 @@ int main(void)
         3,
         GL_FLOAT,
         GL_FALSE,
-        8 * sizeof(GLfloat),
+        14 * sizeof(GLfloat),
         (void*)normPtr
     );
 
@@ -506,13 +610,36 @@ int main(void)
         2,
         GL_FLOAT,
         GL_FALSE,
-        8 * sizeof(GLfloat),
+        14 * sizeof(GLfloat),
         (void*)uvPtr
     );
+
+    GLintptr tangentPtr = 8 * sizeof(float);
+    glVertexAttribPointer(
+        3,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        14 * sizeof(GLfloat),
+        (void*)tangentPtr
+    );
+
+    GLintptr bitangentPtr = 11 * sizeof(float);
+    glVertexAttribPointer(
+        4,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        14 * sizeof(GLfloat),
+        (void*)bitangentPtr
+    );
+
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1); // for Normals
     glEnableVertexAttribArray(2); // 2 for UV / Texture
+    glEnableVertexAttribArray(3); // 3 for Tangent
+    glEnableVertexAttribArray(4); // 4 for Bitangent
 
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     //glBufferData(
@@ -573,17 +700,22 @@ int main(void)
     //                                 glm::vec3(x, y, z));
 
     // Position of light
-    glm::vec3 lightPos = glm::vec3(-10, 3, 0);
+    glm::vec3 lightPos = glm::vec3(0, 0, 10);
     // Light Color
-    glm::vec3 lightColor = glm::vec3(1, 0.75f, 0.8f);
+    glm::vec3 lightColor = glm::vec3(1, 1.f, 1.f);
     // Ambient light strength
     float ambientStr = 0.1f;
     glm::vec3 ambientColor = lightColor;
     //Specular Light
-    float specStr = 0.5f;
+    float specStr = 10.f;
     float specPhong = 16;
 
     float intensityMultiplier = 10;
+
+    // Enable Blending
+    glEnable(GL_BLEND);
+    //Choose a Blending Function
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -596,7 +728,7 @@ int main(void)
         glm::vec3 cameraPos = glm::vec3(0, 0, 10.f);
         /*glm::mat4 cameraPosMatrix = glm::translate(glm::mat4(1.0f), cameraPos * -1.f);*/
         glm::vec3 worldUp = glm::normalize(glm::vec3(0, 1.f, 0));
-        glm::vec3 cameraCenter = glm::vec3(yrot_mod, xrot_mod, 0);
+        glm::vec3 cameraCenter = glm::vec3(0, 0, 0);
 
         // Making the vectors of the camera. ---- if not using lookAt().
         //glm::vec3 F = (cameraCenter - cameraPos); // Forward Vector
@@ -665,14 +797,11 @@ int main(void)
         if (isRotatingRight) yrot_mod += speed;
         if (isRotatingLeft) yrot_mod -= speed;
 
+        lightPos = glm::vec3(x_mod, 0, 10);
         /*if (isChangeLight) lightColor = glm::vec3(1, 1, 1);
         if (!isChangeLight) lightColor = glm::vec3(1, 0.75f, 0.8f);*/
-        if (isChangeLight) intensityMultiplier = 0;
-        if (!isChangeLight) intensityMultiplier = 10;
-        lightPos = glm::vec3(x_mod, 3, 0);
-
-        // idle
-        //yrot_mod += 0.5f;
+        /*if (isChangeLight) intensityMultiplier = 0;
+        if (!isChangeLight) intensityMultiplier = 1000;*/
 
         /*unsigned int rCol = glGetUniformLocation(shaderProgram, "r");
         glUniform1f(rCol, r_mod);
@@ -686,15 +815,23 @@ int main(void)
             height / width,
             0.1f,
             100.f
-        );
-
-        /* APPLYING THE TEXTURE */
+        ); */
+        
+        /* * * * * * * * * * * * APPLYING THE TEXTURE * * * * * * * * * * * * * */
+        glActiveTexture(GL_TEXTURE0);
         GLuint tex0Address = glGetUniformLocation(shaderProgram, "tex0");
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(tex0Address, 0);
-        /* * * * * * * * * * * * * * * * * * * */
+
+        glActiveTexture(GL_TEXTURE1);
+        GLuint tex1Address = glGetUniformLocation(shaderProgram, "norm_tex");
+        glBindTexture(GL_TEXTURE_2D, norm_tex);
+        glUniform1i(tex1Address, 1);
+        /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+        /* * * * * * CREATING THE TRANSFORMATION MATRIX FOR THE MODEL  * * * * * */
         glm::mat4 transformation_matrix = glm::translate(glm::mat4(1.0f),
-            glm::vec3(0, -1.f, 0));
+            glm::vec3(0, -1.f, z_mod));
 
         transformation_matrix = glm::scale(transformation_matrix,
             glm::vec3(scale_mod, scale_mod, scale_mod));
@@ -706,6 +843,8 @@ int main(void)
         transformation_matrix = glm::rotate(transformation_matrix,
             glm::radians(yrot_mod),
             glm::vec3(0.f, 1.f, 0.f));
+
+        
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -773,7 +912,8 @@ int main(void)
         //    GL_UNSIGNED_INT,
         //    0
         //);
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / (5+3));
+
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / (5+3+6));
 
         /*float length = 0.3f;
         float angle, x, y;

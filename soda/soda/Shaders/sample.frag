@@ -10,6 +10,7 @@ uniform float b;
 
 // Texture to be passed
 uniform sampler2D tex0;
+uniform sampler2D norm_tex;
 
 //Position of the light source
 uniform vec3 lightPos;
@@ -40,9 +41,27 @@ in vec3 normCoord;
 //Pass the position of the vertex to the fragment shader later
 in vec3 fragPos;
 
+in mat3 TBN;
+
 void main() {
+	//Get the color of the pixel
+	vec4 pixelColor = texture(tex0, texCoord);
+	//If the alpha is low enough
+	if (pixelColor.a < 0.01) {
+		// Discard this pixel
+		discard;
+		// Ignore the rest after this.
+	}
+
 	//Normalize the received normals
-	vec3 normal = normalize(normCoord);
+	//vec3 normal = normalize(normCoord);
+	vec3 normal = texture(norm_tex, texCoord).rgb;
+	//converts RGB to XYZ
+	// 0 == -1
+	// 1 == 1
+	normal = normalize(normal * 2.0 - 1.0);
+	normal = normalize(TBN * normal);
+
 	//Get the direction of the light to the fragment
 	vec3 lightDir = normalize(lightPos - fragPos);
 
@@ -74,7 +93,7 @@ void main() {
 	// Assign the texture color using the function
 	// Apply the light * intensity
 	// Multiply the light and texture with the intensity to make the light dimmer or brighter depending on where it is and how much the multiplier was set.
-	FragColor = intensity * vec4(diffuse + ambientCol + specColor, 1.0) * texture(tex0, texCoord);
+	FragColor = vec4(intensity * (diffuse + ambientCol + specColor), 1.0) * texture(tex0, texCoord);
 
 	//FragColor = texture(tex0, texCoord);
 }
