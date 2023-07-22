@@ -14,13 +14,15 @@
 #include <string>
 #include <iostream>
 
-float speed = 0.5f;
+float speed = 0.1f;
 float x_mod = 0;
 float y_mod = 0;
-float z_mod = 0.f;
+float z_mod = 10.f;
 //float r_mod = 0;
 //float g_mod = 0;
 //float b_mod = 0;
+float radius = 30.f; // Distance of the spawned object to the camera.=
+float theta_tot = -90.f; // Max angle on the left or bottom side of the screen.
 
 float scale_mod = 0.05f;
 
@@ -775,7 +777,7 @@ int main(void)
         if (isMovingLeft) cameraPos -= glm::normalize(glm::cross(cameraCenter, worldUp)) * 0.5f;
         if (isMovingRight) cameraPos += glm::normalize(glm::cross(cameraCenter, worldUp)) * 0.5f;
         // If moving forward or back, go towards or away from the camera center.
-        if (isMovingForward) cameraPos += speed * (cameraCenter);
+        if (isMovingFront) cameraPos += speed * (cameraCenter);
         if (isMovingBack) cameraPos -= speed * (cameraCenter);
 
         // Create the view matrix.
@@ -859,7 +861,7 @@ int main(void)
 
         /* * * * * * CREATING THE TRANSFORMATION MATRIX FOR THE MODEL  * * * * * */
         glm::mat4 transformation_matrix = glm::translate(glm::mat4(1.0f),
-            glm::vec3(0, -1.f, z_mod));
+            glm::vec3(0, -1.f, 0));
 
         transformation_matrix = glm::scale(transformation_matrix,
             glm::vec3(scale_mod, scale_mod, scale_mod));
