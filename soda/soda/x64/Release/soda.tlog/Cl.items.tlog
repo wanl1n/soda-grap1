@@ -1,2 +1,11 @@
+C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\Light\DirectionLight.cpp;C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\x64\Release\DirectionLight.obj
+C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\Light\Light.cpp;C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\x64\Release\Light.obj
 C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\glad.c;C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\x64\Release\glad.obj
+C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\Camera\OrthoCamera.cpp;C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\x64\Release\OrthoCamera.obj
+C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\Camera\PerspectiveCamera.cpp;C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\x64\Release\PerspectiveCamera.obj
+C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\Light\PointLight.cpp;C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\x64\Release\PointLight.obj
+C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\Model\LightSource.cpp;C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\x64\Release\LightSource.obj
+C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\Model\Model.cpp;C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\x64\Release\Model.obj
+C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\Model\TexturedModel.cpp;C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\x64\Release\TexturedModel.obj
 C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\soda.cpp;C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\x64\Release\soda.obj
+C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\Camera\MyCamera.cpp;C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\x64\Release\MyCamera.obj

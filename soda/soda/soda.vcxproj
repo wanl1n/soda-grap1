@@ -133,10 +133,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Light\DirectionLight.cpp" />
+    <ClCompile Include="Light\Light.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="Camera\OrthoCamera.cpp" />
+    <ClCompile Include="Camera\PerspectiveCamera.cpp" />
+    <ClCompile Include="Light\PointLight.cpp" />
+    <ClCompile Include="Model\LightSource.cpp" />
+    <ClCompile Include="Model\Model.cpp" />
+    <ClCompile Include="Model\TexturedModel.cpp" />
     <ClCompile Include="soda.cpp" />
+    <ClCompile Include="Camera\MyCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera\MyCamera.h" />
+    <ClInclude Include="Camera\OrthoCamera.h" />
+    <ClInclude Include="Camera\PerspectiveCamera.h" />
+    <ClInclude Include="Light\DirectionLight.h" />
+    <ClInclude Include="Light\Light.h" />
+    <ClInclude Include="Light\PointLight.h" />
+    <ClInclude Include="Model\LightSource.h" />
+    <ClInclude Include="Model\Model.h" />
+    <ClInclude Include="soda.h" />
+    <ClInclude Include="Model\TexturedModel.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
@@ -155,6 +174,8 @@
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)Shaders</DestinationFolders>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)Shaders</DestinationFolders>
     </CopyFileToFolders>
+    <None Include="Shaders\lightsource.frag" />
+    <None Include="Shaders\lightsource.vert" />
     <None Include="Shaders\sample.frag" />
     <None Include="Shaders\sample.vert" />
   </ItemGroup>
