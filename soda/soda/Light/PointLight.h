@@ -9,6 +9,8 @@ namespace lighting {
 		public:
 			PointLight(glm::vec3 lightPos);
 
+		public:
+			void applyUniqueValuesToShader(GLuint* shaderProgram, glm::vec3 cameraPos);
 	};
 }
 

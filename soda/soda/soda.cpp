@@ -46,7 +46,7 @@ void Key_Callback(
     int action, // Press or Release
     int mod
 ) {
-    std::cout << "Pressed Key." << std::endl;
+    std::cout << "Pressed Key: " << key << std::endl;
 
     // Changing Camera
     if (key == GLFW_KEY_1 && action == GLFW_PRESS)
@@ -182,9 +182,9 @@ int main(void)
     DirectionLight dirLight = DirectionLight(glm::vec3(4, 11, -3));
 
     // Model Data
-    TexturedModel primaryModel("3D/banancat.obj", glm::vec3(0, 0, 0), glm::vec3(0.1f, 0.1f, 0.1f), &shaderProgram,
-                                "3D/banancat.png", GL_TEXTURE0);
-    LightSource pointLightSource("3D/bunny.obj", glm::vec3(-4, 7, -3), glm::vec3(10.f, 10.f, 10.f), &lightShaderProgram);
+    TexturedModel primaryModel("3D/cinna.obj", glm::vec3(0, 0, 0), glm::vec3(10.f, 10.f, 10.f), &shaderProgram,
+                                "3D/cinna.png", GL_TEXTURE0);
+    LightSource pointLightSource("3D/bulb.obj", glm::vec3(-4, 7, -3), glm::vec3(10.f, 10.f, 10.f), &lightShaderProgram);
     
     int selectedIndex = 0;
     std::vector<Model*> vecModels;
@@ -235,8 +235,14 @@ int main(void)
         }
 
         // If the point light is currently selected
-        if (selectedIndex == 1) 
+        if (selectedIndex == 1) {
             pointLightSource.setColor(green);
+
+            if (pointIncIntensity) pointLightSource.getLight()->changeIntensity(speed);
+            if (pointDecIntensity) pointLightSource.getLight()->changeIntensity(-speed);
+            if (dirIncIntensity) dirLight.changeIntensity(-speed);
+            if (dirDecIntensity) dirLight.changeIntensity(speed);
+        }
         else
             pointLightSource.setColor(white);
 
@@ -247,10 +253,7 @@ int main(void)
         if (isRotatingCounter) selectedModel->rotate(0, 0, speed);
         if (isRotatingClockwise) selectedModel->rotate(0, 0, -speed);
         
-        if (pointIncIntensity) pointLightSource.getLight()->changeIntensity(speed);
-        if (pointDecIntensity) pointLightSource.getLight()->changeIntensity(-speed);
-        if (dirIncIntensity) dirLight.changeIntensity(speed);
-        if (dirDecIntensity) dirLight.changeIntensity(-speed);
+        
         
         // Adding the lighting to the shader
         pointLightSource.getLight()->applyToShader(&shaderProgram, mainCamera->getCameraPos());

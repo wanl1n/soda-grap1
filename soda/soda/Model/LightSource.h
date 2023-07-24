@@ -28,6 +28,7 @@ namespace models {
 			void generateBuffers();
 			void draw(glm::mat4 projection, glm::mat4 viewMatrix);
 			void deleteBuffers();
+			void rotate(float thetaX, float thetaY, float thetaZ);
 
 		public:
 			PointLight* getLight();

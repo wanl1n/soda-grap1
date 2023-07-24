@@ -29,6 +29,7 @@ namespace lighting {
 
 		public:
 			void applyToShader(GLuint* shaderProgram, glm::vec3 cameraPos);
+			virtual void applyUniqueValuesToShader(GLuint* shaderProgram, glm::vec3 cameraPos) = 0;
 			void moveLight(float x_mod, float y_mod, float z_mod);
 			void changeIntensity(float delta);
 

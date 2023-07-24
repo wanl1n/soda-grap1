@@ -3,7 +3,7 @@
 using namespace cameras;
 
 MyCamera::MyCamera(float height, float width, float radius, float speed) : 
-    cameraPos(0, 0, -30.f), projection(1.0f), viewMatrix(1.0f), cameraCenter(0, 0, 0), 
+    cameraPos(0, 0, -10.f), projection(1.0f), viewMatrix(1.0f), cameraCenter(0, 0, 0), 
     worldUp(0, 0, 0) {
 
     this->radius = radius; // Distance of the spawned object to the camera.

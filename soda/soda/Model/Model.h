@@ -29,7 +29,7 @@ namespace models {
             virtual void deleteBuffers() = 0;
 
         public:
-            void rotate(float thetaX, float thetaY, float thetaZ);
+            virtual void rotate(float thetaX, float thetaY, float thetaZ);
     };
 }
 

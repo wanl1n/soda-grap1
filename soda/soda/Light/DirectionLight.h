@@ -8,6 +8,9 @@ namespace lighting {
 	class DirectionLight : public Light {
 		public:
 			DirectionLight(glm::vec3 lightPos);
+
+		public:
+			void applyUniqueValuesToShader(GLuint* shaderProgram, glm::vec3 cameraPos);
 	};
 }
 

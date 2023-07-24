@@ -112,6 +112,10 @@ void LightSource::deleteBuffers() {
     glDeleteBuffers(1, &EBO);
 }
 
+void LightSource::rotate(float thetaX, float thetaY, float thetaZ) {
+
+}
+
 PointLight* LightSource::getLight() {
     return &this->light;
 }
