@@ -19,6 +19,7 @@ Model::Model(glm::vec3 pos, glm::vec3 scale) {
 }
 
 void Model::rotate(float thetaX, float thetaY, float thetaZ) {
+    // Updates the angles of rotation on the corresponding axes.
     this->thetaX += thetaX;
     this->thetaY += thetaY;
     this->thetaZ += thetaZ;

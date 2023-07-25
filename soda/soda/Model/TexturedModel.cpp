@@ -6,14 +6,21 @@ TexturedModel::TexturedModel(std::string path, glm::vec3 pos, glm::vec3 scale,
                             GLuint* shaderProgram,
                             const char* texturePath,
                             GLuint texture_ind) : Model(pos, scale) {
+    // Load the vertices and the buffers of the model.
     loadModelData(path);
+    // Loads the texture of the model.
     loadTexture(texturePath, texture_ind);
+
+    // Saves the texture index for future use.
     this->textureIndex = texture_ind;
+    // Sets the shader program to the accepted shader program.
     this->shaderProgram = shaderProgram;
 }
 
+// Loads the model data through the accepted path.
 void TexturedModel::loadModelData(std::string path) {
 
+    // use tinyobj to load the file.
     std::vector<tinyobj::shape_t> shape;
     std::vector<tinyobj::material_t> material;
     std::string warning, error;
@@ -28,6 +35,7 @@ void TexturedModel::loadModelData(std::string path) {
         path.c_str()
     );
 
+    // Get the full vertex data and save it to the object.
     for (int i = 0; i < shape[0].mesh.indices.size(); i++) {
         tinyobj::index_t vData = shape[0].mesh.indices[i];
 
@@ -43,9 +51,11 @@ void TexturedModel::loadModelData(std::string path) {
         this->fullVertexData.push_back(attributes.texcoords[vData.texcoord_index * 2 + 1]);
     }
 
+    // Generate the buffers.
     generateBuffers();
 }
 
+// Generate the buffers for the vertices and rendering.
 void TexturedModel::generateBuffers() {
 
     glGenVertexArrays(1, &this->VAO);
@@ -73,6 +83,7 @@ void TexturedModel::generateBuffers() {
     glBindVertexArray(0); // Wala ka nang ginagalaw na VAO.
 }
 
+// Loads the texture of the model given in the path.
 void TexturedModel::loadTexture(const char* path, GLuint texture_ind) {
     int img_width, img_height, color_channels; // Width, Height, and color channels of the Texture.
 
@@ -101,6 +112,7 @@ void TexturedModel::loadTexture(const char* path, GLuint texture_ind) {
         GL_REPEAT //GL_CLAMP_TO_EDGE for stretch, 
     );
 
+    // Checks how many color channels there are to either set the rgb mode to with or with the alpha.
     unsigned int rgb = GL_RGB;
     if (color_channels == 3) {
         rgb = GL_RGB;
@@ -128,18 +140,21 @@ void TexturedModel::loadTexture(const char* path, GLuint texture_ind) {
     stbi_image_free(text_bytes);
 }
 
+// Drawing the model.
 void TexturedModel::draw(glm::mat4 projection, glm::mat4 viewMatrix) {
 
-    // Get the shaderprogram to be used.
+    // Set the shaderprogram to be used.
     glUseProgram(*this->shaderProgram);
 
     // Create the transformation matrix and apply the transformation attributes at draw.
     glm::mat4 transformation_matrix = glm::translate(glm::mat4(1.0f),
         this->pos);
 
+    // Scale the object based on the saved scale.
     transformation_matrix = glm::scale(transformation_matrix,
         this->scale);
 
+    // Rotate the object on the corresponding axes.
     transformation_matrix = glm::rotate(transformation_matrix,
         glm::radians(this->thetaX),
         this->xAxis);
@@ -154,23 +169,28 @@ void TexturedModel::draw(glm::mat4 projection, glm::mat4 viewMatrix) {
     unsigned int transformLoc = glGetUniformLocation(*shaderProgram, "transform");
     glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transformation_matrix));
 
+    // Update the projection matrix of the object in the shader program.
     unsigned int projLoc = glGetUniformLocation(*shaderProgram, "projection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+    // Update the view matrix of the shader program.
     unsigned int viewLoc = glGetUniformLocation(*shaderProgram, "view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
+    // Sets the texture of the object in the shader program.
     glActiveTexture(this->textureIndex);
     GLuint tex0Address = glGetUniformLocation(*shaderProgram, "tex0");
     glBindTexture(GL_TEXTURE_2D, texture);
     glUniform1i(tex0Address, 0);
 
+    // Binds the VAO if this object so that it uses this to draw.
     glBindVertexArray(this->VAO);
 
     // Draw the object (XYZUV in arrays) with texture.
     glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / 5);
 }
 
+// Delete the created buffers for clean up.
 void TexturedModel::deleteBuffers() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);

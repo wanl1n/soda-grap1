@@ -3,9 +3,11 @@
 using namespace lighting;
 
 PointLight::PointLight(glm::vec3 lightPos) : Light(lightPos) {
-	this->lightType = 1;
+	// Point light type = 1
+    this->lightType = 1;
 }
 
+// Pretty much the same as in the direction light but this time for the point light properties.
 void PointLight::applyUniqueValuesToShader(GLuint* shaderProgram, glm::vec3 cameraPos) {
     GLuint lightAddress = glGetUniformLocation(*shaderProgram, "lightPos_p");
     glUniform3fv(lightAddress, 1, glm::value_ptr(lightPos));

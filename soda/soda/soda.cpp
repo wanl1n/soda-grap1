@@ -1,8 +1,13 @@
+// All documentations for seperate classes are in the .cpp file.
+
+// Define the libraries once.
 #define TINYOBJLOADER_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 
+// Contains all the external library includes
 #include "soda.h"
 
+// All the includes for the user-defined classes.
 #include "Camera/MyCamera.h"
 #include "Camera/OrthoCamera.h"
 #include "Camera/PerspectiveCamera.h"
@@ -15,14 +20,17 @@
 #include "Model/TexturedModel.h"
 #include "Model/LightSource.h"
 
+// namespaces of the user-defined classes.
 using namespace cameras;
 using namespace lighting;
 using namespace models;
 
+// Common variables used all throughout the main loop.
 float speed = 0.1f;
 glm::vec4 green = glm::vec4(0, 1, 0, 1);
 glm::vec4 white = glm::vec4(1, 1, 1, 1);
 
+// Event flags for inputs.
 bool changeToPers = false;
 bool changeToOrtho = false;
 bool changeSelected = false;
@@ -39,6 +47,7 @@ bool pointDecIntensity = false;
 bool dirIncIntensity = false;
 bool dirDecIntensity = false;
 
+// Input checker
 void Key_Callback(
     GLFWwindow* window,
     int key,
@@ -138,6 +147,7 @@ void CreateProgram(const char* pathVert, const char* pathFrag, GLuint* shaderPro
     // Links the shader to the program.
     glLinkProgram(*shaderProgram);
 
+    // Clean up
     glDeleteShader(vertShader);
     glDeleteShader(fragShader);
 }
@@ -241,24 +251,17 @@ int main(void)
             if (pointDecIntensity) pointLightSource.getLight()->changeIntensity(-speed);
             if (dirIncIntensity) dirLight.changeIntensity(-speed);
             if (dirDecIntensity) dirLight.changeIntensity(speed);
-
-            if (isRotatingUp) selectedModel->rotate(speed, 0, 0);
-            if (isRotatingDown) selectedModel->rotate(-speed, 0, 0);
-            if (isRotatingRight) selectedModel->rotate(0, speed, 0);
-            if (isRotatingLeft) selectedModel->rotate(0, -speed, 0);
-            if (isRotatingCounter) selectedModel->rotate(0, 0, speed);
-            if (isRotatingClockwise) selectedModel->rotate(0, 0, -speed);
         }
         else {
             pointLightSource.setColor(white);
-
-            if (isRotatingUp) selectedModel->rotate(speed, 0, 0);
-            if (isRotatingDown) selectedModel->rotate(-speed, 0, 0);
-            if (isRotatingRight) selectedModel->rotate(0, speed, 0);
-            if (isRotatingLeft) selectedModel->rotate(0, -speed, 0);
-            if (isRotatingCounter) selectedModel->rotate(0, 0, speed);
-            if (isRotatingClockwise) selectedModel->rotate(0, 0, -speed);
         }
+
+        if (isRotatingUp) selectedModel->rotate(speed, 0, 0);
+        if (isRotatingDown) selectedModel->rotate(-speed, 0, 0);
+        if (isRotatingRight) selectedModel->rotate(0, speed, 0);
+        if (isRotatingLeft) selectedModel->rotate(0, -speed, 0);
+        if (isRotatingCounter) selectedModel->rotate(0, 0, speed);
+        if (isRotatingClockwise) selectedModel->rotate(0, 0, -speed);
         
         // Adding the lighting to the shader
         pointLightSource.getLight()->applyToShader(&shaderProgram, mainCamera->getCameraPos());

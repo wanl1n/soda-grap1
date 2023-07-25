@@ -11,6 +11,7 @@ uniform mat4 transform;
 // We'll assign the Projection matrix here.
 uniform mat4 projection;
 
+// Creates a View matrix variable
 uniform mat4 view;
 
 

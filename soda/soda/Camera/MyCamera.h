@@ -1,11 +1,7 @@
 #ifndef CAMERAS_MY_CAMERA_H
 #define CAMERAS_MY_CAMERA_H	
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "../soda.h"
 
 namespace cameras {
 	class MyCamera {
@@ -16,14 +12,16 @@ namespace cameras {
 			glm::mat4 viewMatrix;
 			glm::vec3 cameraPos;
 
-			float radius; // Distance of the spawned object to the camera.
-			float theta_tot; // Max angle on the left or bottom side of the screen.
+			float radius;
+			float theta_tot;
 			float speed;
 			float height;
 			float width;
 
 		public:
 			MyCamera(float height, float width, float radius = 30.f, float speed = 0.01f);
+
+			// These functions will be defined in the child classes.
 			virtual void createProjection() = 0;
 			virtual glm::mat4 calcViewMatrix() = 0;
 
