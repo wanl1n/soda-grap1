@@ -177,8 +177,10 @@ int main(void)
 
     glEnable(GL_DEPTH_TEST);
 
+    // Calls the input getter.
     glfwSetKeyCallback(window, Key_Callback);
 
+    // Creates the shader programs for the models
     GLuint shaderProgram, lightShaderProgram;
     CreateProgram("Shaders/sample.vert", "Shaders/sample.frag", &shaderProgram);
     CreateProgram("Shaders/lightsource.vert", "Shaders/lightsource.frag", &lightShaderProgram);
@@ -198,10 +200,14 @@ int main(void)
     // "Low Poly Light Bulb" (https://skfb.ly/6VnSG) by AleixoAlonso is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
     LightSource pointLightSource("3D/bulb.obj", glm::vec3(-5, 5, 5), glm::vec3(5.f, 5.f, 5.f), &lightShaderProgram);
     
+    // Stores the index of the currently selected model.
     int selectedIndex = 0;
+    // Stores all the initialized models.
     std::vector<Model*> vecModels;
     vecModels.push_back(&primaryModel);
     vecModels.push_back(&pointLightSource);
+
+    // Sets the selected model to the currently selected model from the vector of models.
     Model* selectedModel = vecModels[selectedIndex];
 
     // Stores the mouse cursor positions.
@@ -214,30 +220,42 @@ int main(void)
 
         // For Panning perspective Camera
         if (mainCamera == &persCamera) {
+            // Get the mouse position.
             glfwGetCursorPos(window, &x_cursor_pos, &y_cursor_pos);
+            // Calculate the mouse position with 0, 0 at the center of the screen.
             glm::vec2 mousePos = glm::vec2(x_cursor_pos - (width / 2), y_cursor_pos - (height / 2));
 
+            // Calculate the position of the perspective camera relative to the mouse position (rotation)
             persCamera.calcMouseToCamera(mousePos);
         }
 
+        // Calculate the view matrix of the currently used camera.
         glm::mat4 viewMatrix = mainCamera->calcViewMatrix();
         
         /* * * * * * * * * * * * * * * * * UPDATE * * * * * * * * * * * * * * * * */
+        // Changing to perspective view.
         if (changeToPers) {
+            // Set the camera to the perspective camera.
             mainCamera = &persCamera;
             changeToPers = false;
             std::cout << "Currently using Perspective Camera." << std::endl;
         }
+
+        // Chaning to Orthographic view.
         if (changeToOrtho) {
+            // Set the camera to the orthographic camera.
             mainCamera = &orthoCamera;
             changeToOrtho = false;
             std::cout << "Currently using Orthographic Camera." << std::endl;
         }
 
+        // Changing the selected model.
         if (changeSelected) {
+            // If it's not 0, it's 1 and vice versa.
             if (selectedIndex == 0) selectedIndex = 1;
             else selectedIndex = 0;
 
+            // Get the model at the newly changed index and set it to selected.
             selectedModel = vecModels[selectedIndex];
             changeSelected = false;
             std::cout << "Switched selected object." << std::endl;
@@ -245,17 +263,21 @@ int main(void)
 
         // If the point light is currently selected
         if (selectedIndex == 1) {
+            // Change the color to green since it's selected.
             pointLightSource.setColor(green);
 
+            // Allow the changing of the intensity for both the point light and the directional light.
             if (pointIncIntensity) pointLightSource.getLight()->changeIntensity(speed);
             if (pointDecIntensity) pointLightSource.getLight()->changeIntensity(-speed);
             if (dirIncIntensity) dirLight.changeIntensity(-speed);
             if (dirDecIntensity) dirLight.changeIntensity(speed);
         }
         else {
+            // Change the color to white if it is not currently selected.
             pointLightSource.setColor(white);
         }
 
+        // Rotate the currently selected model based on what axis the user is inputting.
         if (isRotatingUp) selectedModel->rotate(speed, 0, 0);
         if (isRotatingDown) selectedModel->rotate(-speed, 0, 0);
         if (isRotatingRight) selectedModel->rotate(0, speed, 0);

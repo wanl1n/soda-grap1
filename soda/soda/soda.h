@@ -1,6 +1,7 @@
 #ifndef SODA_H
 #define SODA_H
 
+// External libraries used in the program.
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
