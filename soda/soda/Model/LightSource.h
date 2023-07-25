@@ -18,6 +18,7 @@ namespace models {
 			tinyobj::attrib_t attributes;
 
 			PointLight light;
+			float radius;
 
 		public:
 			LightSource(std::string path, glm::vec3 pos, glm::vec3 scale,

@@ -8,6 +8,7 @@ LightSource::LightSource(std::string path, glm::vec3 pos, glm::vec3 scale,
     this->loadModelData(path);
 
     this->shaderProgram = shaderProgram;
+    this->radius = 5.f;
 }
 
 void LightSource::loadModelData(std::string path) {
@@ -71,6 +72,8 @@ void LightSource::draw(glm::mat4 projection, glm::mat4 viewMatrix) {
     glUseProgram(*this->shaderProgram);
 
     // Create the transformation matrix and apply the transformation attributes at draw.
+    /*glm::mat4 transformation_matrix = glm::translate(glm::mat4(1.0f),
+        glm::vec3(this->radius));*/
     glm::mat4 transformation_matrix = glm::translate(glm::mat4(1.0f),
         this->pos);
 
@@ -86,6 +89,11 @@ void LightSource::draw(glm::mat4 projection, glm::mat4 viewMatrix) {
     transformation_matrix = glm::rotate(transformation_matrix,
         glm::radians(this->thetaZ),
         this->zAxis);
+
+    /*transformation_matrix = glm::translate(transformation_matrix,
+        -this->pos);*/
+
+    this->light.setPosition(this->pos);
 
     // Update the shader with the new transform of the object.
     unsigned int transformLoc = glGetUniformLocation(*shaderProgram, "transform");
@@ -106,14 +114,33 @@ void LightSource::draw(glm::mat4 projection, glm::mat4 viewMatrix) {
     glDrawElements(GL_TRIANGLES, mesh_indices.size(), GL_UNSIGNED_INT, 0);
 }
 
+void LightSource::rotate(float thetaX, float thetaY, float thetaZ) {
+
+    this->thetaX += thetaX;
+    this->thetaY += thetaY;
+    this->thetaZ += thetaZ;
+
+    float yaw = glm::radians((this->thetaX / radius) * 359.f);
+    float pitch = glm::radians((this->thetaY / radius) * 359.f);
+
+    // Limiting the degree in case of flipping.
+    if (yaw > 359.9f) yaw = 359.9f;
+    if (yaw < -359.9f) yaw = -359.9f;
+    if (pitch > 359.9f) pitch = 359.9f;
+    if (pitch < -359.9f) pitch = -359.9f;
+
+    // Finally get the direction in each axis by using Polar to Cartesian point conversion.
+    float xAxisRot = this->radius * sin(yaw) * cos(pitch);
+    float yAxisRot = this->radius * sin(pitch);
+    float zAxisRot = this->radius * cos(yaw) * cos(pitch);
+
+    this->pos = glm::vec3(xAxisRot, yAxisRot, zAxisRot);
+}
+
 void LightSource::deleteBuffers() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-}
-
-void LightSource::rotate(float thetaX, float thetaY, float thetaZ) {
-
 }
 
 PointLight* LightSource::getLight() {

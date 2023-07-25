@@ -11,6 +11,7 @@ namespace cameras {
 
 		public:
 			void createProjection();
+			glm::mat4 calcViewMatrix();
 	};
 }
 

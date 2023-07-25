@@ -35,6 +35,7 @@ namespace lighting {
 
 		public:
 			void setColor(glm::vec4 color);
+			void setPosition(glm::vec3 transform_matrix);
 	};
 }
 

@@ -44,3 +44,7 @@ void Light::changeIntensity(float delta) {
 void Light::setColor(glm::vec4 color) {
     this->lightColor = color;
 }
+
+void Light::setPosition(glm::vec3 pos) {
+    this->lightPos = pos;
+}

@@ -11,6 +11,10 @@ namespace cameras {
 
 		public:
 			void createProjection();
+
+		public:
+			void calcMouseToCamera(glm::vec2 mousePos);
+			glm::mat4 calcViewMatrix();
 	};
 }
 

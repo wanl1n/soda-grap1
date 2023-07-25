@@ -182,9 +182,11 @@ int main(void)
     DirectionLight dirLight = DirectionLight(glm::vec3(4, 11, -3));
 
     // Model Data
-    TexturedModel primaryModel("3D/cinna.obj", glm::vec3(0, 0, 0), glm::vec3(10.f, 10.f, 10.f), &shaderProgram,
+    // "Sanrio Cinnamoroll" (https://skfb.ly/oENJM) by woomie is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+    TexturedModel primaryModel("3D/cinna.obj", glm::vec3(0, 0, 0), glm::vec3(5.f, 5.f, 5.f), &shaderProgram,
                                 "3D/cinna.png", GL_TEXTURE0);
-    LightSource pointLightSource("3D/bulb.obj", glm::vec3(-4, 7, -3), glm::vec3(10.f, 10.f, 10.f), &lightShaderProgram);
+    // "Low Poly Light Bulb" (https://skfb.ly/6VnSG) by AleixoAlonso is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+    LightSource pointLightSource("3D/bulb.obj", glm::vec3(-5, 5, 5), glm::vec3(5.f, 5.f, 5.f), &lightShaderProgram);
     
     int selectedIndex = 0;
     std::vector<Model*> vecModels;
@@ -200,16 +202,13 @@ int main(void)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
-        /* * * * * ADJUSTING THE CAMERA ACCORDING TO THE MOUSE POSITION * * * * */
-        glfwGetCursorPos(window, &x_cursor_pos, &y_cursor_pos);
-        glm::vec2 mousePos = glm::vec2(x_cursor_pos - (width / 2), y_cursor_pos - (height / 2));
-        
-        mainCamera->calcMouseToCamera(mousePos);
+        // For Panning perspective Camera
+        if (mainCamera == &persCamera) {
+            glfwGetCursorPos(window, &x_cursor_pos, &y_cursor_pos);
+            glm::vec2 mousePos = glm::vec2(x_cursor_pos - (width / 2), y_cursor_pos - (height / 2));
 
-        /*if (isMovingLeft) mainCamera->moveLeft();
-        if (isMovingRight) mainCamera->moveRight();
-        if (isMovingFront) mainCamera->moveForward();
-        if (isMovingBack) mainCamera->moveBack();*/
+            persCamera.calcMouseToCamera(mousePos);
+        }
 
         glm::mat4 viewMatrix = mainCamera->calcViewMatrix();
         
@@ -242,26 +241,33 @@ int main(void)
             if (pointDecIntensity) pointLightSource.getLight()->changeIntensity(-speed);
             if (dirIncIntensity) dirLight.changeIntensity(-speed);
             if (dirDecIntensity) dirLight.changeIntensity(speed);
+
+            if (isRotatingUp) selectedModel->rotate(speed, 0, 0);
+            if (isRotatingDown) selectedModel->rotate(-speed, 0, 0);
+            if (isRotatingRight) selectedModel->rotate(0, speed, 0);
+            if (isRotatingLeft) selectedModel->rotate(0, -speed, 0);
+            if (isRotatingCounter) selectedModel->rotate(0, 0, speed);
+            if (isRotatingClockwise) selectedModel->rotate(0, 0, -speed);
         }
-        else
+        else {
             pointLightSource.setColor(white);
 
-        if (isRotatingUp) selectedModel->rotate(speed, 0, 0);
-        if (isRotatingDown) selectedModel->rotate(-speed, 0, 0);
-        if (isRotatingRight) selectedModel->rotate(0, speed, 0);
-        if (isRotatingLeft) selectedModel->rotate(0, -speed, 0);
-        if (isRotatingCounter) selectedModel->rotate(0, 0, speed);
-        if (isRotatingClockwise) selectedModel->rotate(0, 0, -speed);
-        
-        
+            if (isRotatingUp) selectedModel->rotate(speed, 0, 0);
+            if (isRotatingDown) selectedModel->rotate(-speed, 0, 0);
+            if (isRotatingRight) selectedModel->rotate(0, speed, 0);
+            if (isRotatingLeft) selectedModel->rotate(0, -speed, 0);
+            if (isRotatingCounter) selectedModel->rotate(0, 0, speed);
+            if (isRotatingClockwise) selectedModel->rotate(0, 0, -speed);
+        }
         
         // Adding the lighting to the shader
         pointLightSource.getLight()->applyToShader(&shaderProgram, mainCamera->getCameraPos());
         dirLight.applyToShader(&shaderProgram, mainCamera->getCameraPos());
 
         // Drawing the models.
-        primaryModel.draw(mainCamera->getProjection(), viewMatrix);
-        pointLightSource.draw(mainCamera->getProjection(), viewMatrix);
+        for (Model* model : vecModels) {
+            model->draw(mainCamera->getProjection(), viewMatrix);
+        }
 
         glUseProgram(shaderProgram);
 
