@@ -93,28 +93,4 @@
     <None Include="Shaders\lightsource.frag" />
     <None Include="Shaders\lightsource.vert" />
   </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="Shaders\skybox.frag" />
-    <CopyFileToFolders Include="Shaders\skybox.vert" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Skybox\rainbow_bk.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Skybox\rainbow_dn.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Skybox\rainbow_ft.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Skybox\rainbow_lf.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Skybox\rainbow_rt.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Skybox\rainbow_up.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
 </Project>

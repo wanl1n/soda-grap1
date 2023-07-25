@@ -1,17 +1,1 @@
-﻿  DirectionLight.cpp
-  Light.cpp
-  PointLight.cpp
-  LightSource.cpp
-C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\Model\LightSource.cpp(129,51): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-  Model.cpp
-  TexturedModel.cpp
-C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\Model\TexturedModel.cpp(190,57): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-  soda.cpp
-C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\soda.cpp(167,39): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\soda.cpp(167,31): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-  Generating code
-  14 of 2235 functions ( 0.6%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    14 functions had inline decision re-evaluated but remain unchanged
-  Finished generating code
-  soda.vcxproj -> C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\x64\Release\soda.exe
+﻿  soda.vcxproj -> C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\x64\Release\soda.exe
