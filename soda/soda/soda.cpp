@@ -18,9 +18,6 @@ float speed = 0.1f;
 float x_mod = 0;
 float y_mod = 0;
 float z_mod = -20.f;
-//float r_mod = 0;
-//float g_mod = 0;
-//float b_mod = 0;
 float radius = 30.f; // Distance of the spawned object to the camera.=
 float theta_tot = -90.f; // Max angle on the left or bottom side of the screen.
 
@@ -128,10 +125,8 @@ void scroll_callback(
     isMovingBack = false;
     if (yoffset < 0)
         xrot_mod -= speed*50;
-        //isMovingBack = true;
     if (yoffset > 0)
         xrot_mod += speed*50;
-        //isMovingFront = true;
 }
 
 GLuint LoadImage(const char* path, unsigned int texture_ind) {
@@ -195,8 +190,6 @@ GLuint LoadImage(const char* path, unsigned int texture_ind) {
 int main(void)
 {
     GLFWwindow* window;
-    // Center of window is 0,0
-    // Sides are 1 or -1.
 
     /* Initialize the library */
     if (!glfwInit())
@@ -223,8 +216,6 @@ int main(void)
 
     // Enable Depth Testing
     glEnable(GL_DEPTH_TEST);
-
-    //glViewport(0, 0, 300, 600); // changes the size of the viewport; used for splitscreen etc.
 
     // Gets user input.
     glfwSetKeyCallback(window, Key_Callback);
@@ -419,40 +410,30 @@ int main(void)
         );
     }
 
-    //Vector to hold our tangents
     std::vector<glm::vec3> tangents;
-    //Vector to hold our bitangents
     std::vector<glm::vec3> bitangents;
 
-    for(int i = 0; i < shape[0].mesh.indices.size(); i += 3) {
-
-        // Get the 3 vertex data for the triangle
+    for (int i = 0; i < shape[0].mesh.indices.size(); i += 3) {
         tinyobj::index_t vData1 = shape[0].mesh.indices[i];
         tinyobj::index_t vData2 = shape[0].mesh.indices[i+1];
         tinyobj::index_t vData3 = shape[0].mesh.indices[i+2];
 
-        // Position of vertex 1
-        glm::vec3 v1 = glm::vec3(attributes.vertices[vData1.vertex_index * 3],
-                                attributes.vertices[vData1.vertex_index * 3] + 1,
-                                attributes.vertices[vData1.vertex_index * 3] + 2);
-        // Position of vertex 2
+        glm::vec3 v1 = glm::vec3(attributes.vertices[vData1.vertex_index * 3], 
+                                 attributes.vertices[(vData1.vertex_index * 3) + 1],
+                                 attributes.vertices[(vData1.vertex_index * 3) + 2]);
         glm::vec3 v2 = glm::vec3(attributes.vertices[vData2.vertex_index * 3],
-                                attributes.vertices[vData2.vertex_index * 3] + 1,
-                                attributes.vertices[vData2.vertex_index * 3] + 2);
-        //position of vertex 3
+                                 attributes.vertices[(vData2.vertex_index * 3) + 1],
+                                 attributes.vertices[(vData2.vertex_index * 3) + 2]);
         glm::vec3 v3 = glm::vec3(attributes.vertices[vData3.vertex_index * 3],
-                                attributes.vertices[vData3.vertex_index * 3] + 1,
-                                attributes.vertices[vData3.vertex_index * 3] + 2);
+                                 attributes.vertices[(vData3.vertex_index * 3) + 1],
+                                 attributes.vertices[(vData3.vertex_index * 3) + 2]);
 
-        // Position of uv 1
-        glm::vec2 uv1 = glm::vec2(attributes.texcoords[vData1.texcoord_index * 2],
-                                attributes.texcoords[vData1.texcoord_index * 2] + 1);
-        // Position of uv 2
-        glm::vec2 uv2 = glm::vec2(attributes.texcoords[vData2.texcoord_index * 2],
-                                attributes.texcoords[vData2.texcoord_index * 2] + 1);
-        //position of uv 3
-        glm::vec2 uv3 = glm::vec2(attributes.texcoords[vData3.texcoord_index * 2],
-                                attributes.texcoords[vData3.texcoord_index * 2] + 1);
+        glm::vec2 uv1 = glm::vec2(attributes.texcoords[(vData1.texcoord_index * 2)],
+                                  attributes.texcoords[(vData1.texcoord_index * 2) +1]);
+        glm::vec2 uv2 = glm::vec2(attributes.texcoords[(vData2.texcoord_index * 2)],
+                                  attributes.texcoords[(vData2.texcoord_index * 2) + 1]);
+        glm::vec2 uv3 = glm::vec2(attributes.texcoords[(vData3.texcoord_index * 2)],
+                                  attributes.texcoords[(vData3.texcoord_index * 2) + 1]);
 
         glm::vec3 deltaPos1 = v2 - v1;
         glm::vec3 deltaPos2 = v3 - v1;
@@ -461,10 +442,7 @@ int main(void)
         glm::vec2 deltaUV2 = uv3 - uv1;
 
         float r = 1.0f / ((deltaUV1.x * deltaUV2.y) - (deltaUV1.y * deltaUV2.x));
-
-        // Tangent (T)
         glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
-        // Bitangent (B)
         glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
 
         tangents.push_back(tangent);

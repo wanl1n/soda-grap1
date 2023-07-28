@@ -1,7 +1,7 @@
 ﻿  soda.cpp
-C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\soda.cpp(209,39): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\soda.cpp(209,31): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\soda.cpp(801,61): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\soda.cpp(202,39): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\soda.cpp(202,31): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\tiger\Documents\Acads\y2\t3\gdgrap1\gdgrap1\soda\soda\soda.cpp(779,61): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
   Generating code
   1 of 2198 functions (<0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
