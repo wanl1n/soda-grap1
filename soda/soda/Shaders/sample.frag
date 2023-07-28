@@ -3,13 +3,9 @@
 // Point Light
 out vec4 FragColor;
 
-// For changing r g b values
-uniform float r;
-uniform float g;
-uniform float b;
-
 // Texture to be passed
 uniform sampler2D tex0;
+uniform sampler2D tex1;
 uniform sampler2D norm_tex;
 
 //Position of the light source
@@ -45,11 +41,11 @@ in mat3 TBN;
 
 void main() {
 	//Get the color of the pixel
-	vec4 pixelColor = texture(tex0, texCoord);
+	vec4 pixelColor = texture(tex1, texCoord);
 	//If the alpha is low enough
 	if (pixelColor.a < 0.01) {
 		// Discard this pixel
-		discard;
+		//discard;
 		// Ignore the rest after this.
 	}
 
@@ -87,13 +83,12 @@ void main() {
 	// Multiply this by the multiplier, this can be any float value that will make the light brighter as it goes higher.
 	float intensity = 1 / (dist * dist) * intensityMult;
 
-	//Changing the color using rgba values.
-	//FragColor = vec4(1.0f + r, 0.75f + g, 0.796f + b, 1.0f); //rgba
-
 	// Assign the texture color using the function
 	// Apply the light * intensity
 	// Multiply the light and texture with the intensity to make the light dimmer or brighter depending on where it is and how much the multiplier was set.
-	FragColor = vec4(intensity * (diffuse + ambientCol + specColor), 1.0) * texture(tex0, texCoord);
+	FragColor = vec4(intensity * (diffuse + ambientCol + specColor), 1.0f) * texture(tex0, texCoord);
+	FragColor.a = 0.5f;
+	FragColor += vec4(intensity * (diffuse + ambientCol + specColor), 1.0f) * texture(tex1, texCoord);
 
 	//FragColor = texture(tex0, texCoord);
 }
