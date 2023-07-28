@@ -471,7 +471,7 @@ int main(void)
     glm::vec3 cameraCenter = glm::vec3(0, 0, 0);
 
     glm::mat4 viewMatrix = glm::lookAt(cameraPos,
-        cameraCenter, // to make sure cameracenter is always infront of camera pos.
+        cameraCenter,
         worldUp);
 
     // Enable Blending
@@ -485,20 +485,25 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Clear the depth buffer as well.
         
+        // Rendering the Skybox
         glDepthMask(GL_FALSE);
         glDepthFunc(GL_LEQUAL);
 
         glUseProgram(skyboxProgram);
         
+        // Getting the view matrix for the skybox
         glm::mat4 skyView = glm::mat4(1.f);
         skyView = glm::mat4(glm::mat3(viewMatrix));
 
+        // Passing the projection to the skybox shader
         unsigned int skyProjectionLoc = glGetUniformLocation(skyboxProgram, "projection");
         glUniformMatrix4fv(skyProjectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+        // Passing the skybox view matrix to the skybox shader
         unsigned int skyViewLoc = glGetUniformLocation(skyboxProgram, "view");
         glUniformMatrix4fv(skyViewLoc, 1, GL_FALSE, glm::value_ptr(skyView));
 
+        // Draw the skybox
         glBindVertexArray(skyboxVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
@@ -507,19 +512,24 @@ int main(void)
         
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
+
+        // Set the shader back to the original.
         glUseProgram(shaderProgram);
         
-        /* * * * * * * * * * * * APPLYING THE TEXTURE * * * * * * * * * * * * * */
+        /* * * * * * * * * * * * APPLYING THE TEXTURES * * * * * * * * * * * * * */
+        // Brick wall texture
         glActiveTexture(GL_TEXTURE0);
         GLuint tex0Address = glGetUniformLocation(shaderProgram, "tex0");
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(tex0Address, 0);
 
+        // Yae Texture
         glActiveTexture(GL_TEXTURE2);
         GLuint yaeTexAddress = glGetUniformLocation(shaderProgram, "tex1");
         glBindTexture(GL_TEXTURE_2D, yaeTex);
         glUniform1i(yaeTexAddress, 2);
 
+        // Normals
         glActiveTexture(GL_TEXTURE1);
         GLuint tex1Address = glGetUniformLocation(shaderProgram, "norm_tex");
         glBindTexture(GL_TEXTURE_2D, norm_tex);
@@ -611,7 +621,6 @@ int main(void)
     // Clean up
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    //glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;

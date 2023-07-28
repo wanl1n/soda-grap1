@@ -41,16 +41,15 @@ in mat3 TBN;
 
 void main() {
 	//Get the color of the pixel
-	vec4 pixelColor = texture(tex1, texCoord);
+	vec4 pixelColor = texture(tex0, texCoord);
 	//If the alpha is low enough
 	if (pixelColor.a < 0.01) {
 		// Discard this pixel
-		//discard;
+		discard;
 		// Ignore the rest after this.
 	}
 
 	//Normalize the received normals
-	//vec3 normal = normalize(normCoord);
 	vec3 normal = texture(norm_tex, texCoord).rgb;
 	//converts RGB to XYZ
 	// 0 == -1
@@ -84,9 +83,10 @@ void main() {
 	float intensity = 1 / (dist * dist) * intensityMult;
 
 	// Assign the texture color using the function
-	// Apply the light * intensity
-	// Multiply the light and texture with the intensity to make the light dimmer or brighter depending on where it is and how much the multiplier was set.
+	// First render the texture of the brick wall.
 	FragColor = vec4(intensity * (diffuse + ambientCol + specColor), 1.0f) * texture(tex0, texCoord);
+	// Second make it translucent.
 	FragColor.a = 0.5f;
+	// Finally add the Yae image on top of the brick wall.
 	FragColor += vec4(intensity * (diffuse + ambientCol + specColor), 1.0f) * texture(tex1, texCoord);
 }
