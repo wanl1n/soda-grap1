@@ -89,6 +89,4 @@ void main() {
 	FragColor = vec4(intensity * (diffuse + ambientCol + specColor), 1.0f) * texture(tex0, texCoord);
 	FragColor.a = 0.5f;
 	FragColor += vec4(intensity * (diffuse + ambientCol + specColor), 1.0f) * texture(tex1, texCoord);
-
-	//FragColor = texture(tex0, texCoord);
 }

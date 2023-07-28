@@ -15,119 +15,8 @@
 #include <iostream>
 
 float speed = 0.1f;
-float x_mod = 0;
-float y_mod = 0;
-float z_mod = -20.f;
-float radius = 30.f; // Distance of the spawned object to the camera.=
-float theta_tot = -90.f; // Max angle on the left or bottom side of the screen.
-
 float scale_mod = 7.0f;
-
-float xrot_mod = 0.f;
-float yrot_mod = 180.f;
-
-float fov_mod = 60.f;
-
-bool isMovingUp = false;
-bool isMovingDown = false;
-bool isMovingLeft = false;
-bool isMovingRight = false;
-bool isMovingFront = false;
-bool isMovingBack = false;
-
-bool isRotatingUp = false;
-bool isRotatingDown = false;
-bool isRotatingRight = false;
-bool isRotatingLeft = false;
-
-bool isScalingUp = false;
-bool isScalingDown = false;
-
-bool isZoomingIn = false;
-bool isZoomingOut = false;
-
-bool isChangeLight = false;
-
-void Key_Callback(
-    GLFWwindow* window,
-    int key,
-    int scancode,
-    int action, // Press or Release
-    int mod
-) {
-    if (key == GLFW_KEY_D && action == GLFW_PRESS)
-        isMovingRight = true;
-    if (key == GLFW_KEY_D && action == GLFW_RELEASE)
-        isMovingRight = false;
-
-    if (key == GLFW_KEY_A && action == GLFW_PRESS)
-        isMovingLeft = true;
-    if (key == GLFW_KEY_A && action == GLFW_RELEASE)
-        isMovingLeft = false;
-
-    if (key == GLFW_KEY_W && action == GLFW_PRESS)
-        isMovingUp = true;
-    if (key == GLFW_KEY_W && action == GLFW_RELEASE)
-        isMovingUp = false;
-
-    if (key == GLFW_KEY_S && action == GLFW_PRESS)
-        isMovingDown = true;
-    if (key == GLFW_KEY_S && action == GLFW_RELEASE)
-        isMovingDown = false;
-
-    if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS)
-        isRotatingRight = true;
-    if (key == GLFW_KEY_RIGHT && action == GLFW_RELEASE)
-        isRotatingRight = false;
-    if (key == GLFW_KEY_UP && action == GLFW_PRESS)
-        isRotatingUp = true;
-    if (key == GLFW_KEY_UP && action == GLFW_RELEASE)
-        isRotatingUp = false;
-    if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
-        isRotatingDown = true;
-    if (key == GLFW_KEY_DOWN && action == GLFW_RELEASE)
-        isRotatingDown = false;
-    if (key == GLFW_KEY_LEFT && action == GLFW_PRESS)
-        isRotatingLeft = true;
-    if (key == GLFW_KEY_LEFT && action == GLFW_RELEASE)
-        isRotatingLeft = false;
-
-    if (key == GLFW_KEY_Q && action == GLFW_PRESS)
-        isScalingDown = true;
-    if (key == GLFW_KEY_Q && action == GLFW_RELEASE)
-        isScalingDown = false;
-    if (key == GLFW_KEY_E && action == GLFW_PRESS)
-        isScalingUp = true;
-    if (key == GLFW_KEY_E && action == GLFW_RELEASE)
-        isScalingUp = false;
-
-    if (key == GLFW_KEY_Z && action == GLFW_PRESS)
-        isZoomingIn = true;
-    if (key == GLFW_KEY_Z && action == GLFW_RELEASE)
-        isZoomingIn = false;
-    if (key == GLFW_KEY_X && action == GLFW_PRESS)
-        isZoomingOut = true;
-    if (key == GLFW_KEY_X && action == GLFW_RELEASE)
-        isZoomingOut = false;
-
-    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-        isChangeLight = true;
-    if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE)
-        isChangeLight = false;
-}
-
-void scroll_callback(
-    GLFWwindow* window, 
-    double xoffset, 
-    double yoffset)
-{
-    isMovingFront = false;
-    isMovingBack = false;
-    if (yoffset < 0)
-        xrot_mod -= speed*50;
-    if (yoffset > 0)
-        xrot_mod += speed*50;
-}
+float xrot_mod = 180.f;
 
 GLuint LoadImage(const char* path, unsigned int texture_ind) {
     int img_width, img_height, color_channels; // Width, Height, and color channels of the Texture.
@@ -211,15 +100,11 @@ int main(void)
     gladLoadGL();
 
     GLuint texture = LoadImage("3D/brickwall.jpg", GL_TEXTURE0);
-    GLuint yaeTex = LoadImage("3D/peop.png", GL_TEXTURE2);
+    GLuint yaeTex = LoadImage("3D/yae.png", GL_TEXTURE2);
     GLuint norm_tex = LoadImage("3D/brickwall_normal.jpg", GL_TEXTURE1);
 
     // Enable Depth Testing
     glEnable(GL_DEPTH_TEST);
-
-    // Gets user input.
-    glfwSetKeyCallback(window, Key_Callback);
-    glfwSetScrollCallback(window, scroll_callback);
 
     // Vertex shader for positioning
     std::fstream vertSrc("Shaders/sample.vert");
@@ -484,11 +369,8 @@ int main(void)
     }
 
     GLuint VAO, VBO;
-        //EBO, VBO_UV;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    //glGenBuffers(1, &VBO_UV); // Generate UV Buffer
-    //glGenBuffers(1, &EBO);
 
     // We're working with this VAO.
     glBindVertexArray(VAO);
@@ -507,7 +389,6 @@ int main(void)
         3, // XYZ
         GL_FLOAT, // Type of array
         GL_FALSE, // If need normalize, TRUE
-        //XYZ normals UV (change from 3 to 5) add TB
         14 * sizeof(GL_FLOAT), // Size of the vertex data
         (void*)0
     );
@@ -572,11 +453,11 @@ int main(void)
     );
 
     // Position of light
-    glm::vec3 lightPos = glm::vec3(2, 2, 1);
+    glm::vec3 lightPos = glm::vec3(1, 6, 1.f);
     // Light Color
     glm::vec3 lightColor = glm::vec3(1, 1.f, 1.f);
     // Ambient light strength
-    float ambientStr = 0.1f;
+    float ambientStr = 0.5f;
     glm::vec3 ambientColor = lightColor;
     //Specular Light
     float specStr = 10.f;
@@ -584,11 +465,14 @@ int main(void)
 
     float intensityMultiplier = 20;
 
-    // Stores the mouse cursor positions.
-    double x_cursor_pos, y_cursor_pos;
+    // Set up the view matrix
+    glm::vec3 cameraPos = glm::vec3(0, 0, -20.f);
+    glm::vec3 worldUp = glm::normalize(glm::vec3(0, 1.f, 0));
+    glm::vec3 cameraCenter = glm::vec3(0, 0, 0);
 
-    // Initialize the camera position.
-    glm::vec3 cameraPos = glm::vec3(x_mod, y_mod, z_mod);
+    glm::mat4 viewMatrix = glm::lookAt(cameraPos,
+        cameraCenter, // to make sure cameracenter is always infront of camera pos.
+        worldUp);
 
     // Enable Blending
     glEnable(GL_BLEND);
@@ -601,41 +485,6 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Clear the depth buffer as well.
         
-        /* * * * * * * * * * * * SETTING UP THE VIEW MATRIX * * * * * * * * * * * */
-        // Making the camera variables and setting up.
-        //glm::vec3 cameraPos = glm::vec3(0, 0, 10.f);
-        //glm::vec3 worldUp = glm::normalize(glm::vec3(0, 1.f, 0));
-        //glm::vec3 cameraCenter = glm::vec3(0, 0, 0);
-
-        //glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraCenter, worldUp); // For this, no need to make the vectors.
-
-        // Get the position of the cursor in the window.
-        glfwGetCursorPos(window, &x_cursor_pos, &y_cursor_pos);
-
-        // Calculate the position of the mouse with the origin (0, 0) at the center of the window.
-        glm::vec2 mousePos = glm::vec2(x_cursor_pos - (width / 2), y_cursor_pos - (height / 2));
-
-        float yaw = glm::radians((mousePos.x / (width / 2)) * theta_tot);
-        float pitch = glm::radians((mousePos.y / (height / 2)) * theta_tot);
-
-        // Limiting the degree in case of flipping.
-        if (yaw > 89.9f) yaw = 89.9f;
-        if (yaw < -89.9f) yaw = -89.9f;
-        if (pitch > 89.9f) pitch = 89.9f;
-        if (pitch < -89.9f) pitch = -89.9f;
-
-        // Finally get the direction in each axis by using Polar to Cartesian point conversion.
-        float xAxisRot = radius * sin(yaw) * cos(pitch);
-        float yAxisRot = radius * sin(pitch);
-        float zAxisRot = radius * cos(yaw) * cos(pitch);
-
-        glm::vec3 cameraCenter = glm::vec3(xAxisRot, yAxisRot, zAxisRot);
-        glm::vec3 worldUp = glm::normalize(glm::vec3(0, 1.f, 0));
-
-        glm::mat4 viewMatrix = glm::lookAt(cameraPos,
-            cameraPos + cameraCenter, // to make sure cameracenter is always infront of camera pos.
-            worldUp);
-
         glDepthMask(GL_FALSE);
         glDepthFunc(GL_LEQUAL);
 
@@ -659,23 +508,6 @@ int main(void)
         glDepthMask(GL_TRUE);
         glDepthFunc(GL_LESS);
         glUseProgram(shaderProgram);
-
-        /* * * * * * * * * * * * * * * * * FOR TESTING * * * * * * * * * * * * * * * * */
-        if (isMovingUp)  lightPos.y += speed;
-        if (isMovingDown) lightPos.y -= speed;
-        if (isMovingLeft) lightPos.x -= speed;
-        if (isMovingRight) lightPos.x += speed;
-        if (isMovingFront) lightPos.z += speed;
-        if (isMovingBack) lightPos.z -= speed;
-        if (isScalingUp) lightPos.z += speed;
-        if (isScalingDown) lightPos.z -= speed;
-
-        if (isRotatingUp) intensityMultiplier += speed;
-        if (isRotatingDown) intensityMultiplier -= speed;
-        if (isRotatingRight) yrot_mod += speed;
-        if (isRotatingLeft) yrot_mod -= speed;
-
-        std::cout << lightPos.x << " " << lightPos.y << " " << lightPos.z << std::endl;
         
         /* * * * * * * * * * * * APPLYING THE TEXTURE * * * * * * * * * * * * * */
         glActiveTexture(GL_TEXTURE0);
@@ -702,20 +534,11 @@ int main(void)
             glm::vec3(scale_mod, scale_mod, scale_mod));
 
         transformation_matrix = glm::rotate(transformation_matrix,
-            glm::radians(xrot_mod),
-            //glm::radians(yrot_mod+=speed),
-            glm::vec3(1.f, 0.f, 0.f));
-        transformation_matrix = glm::rotate(transformation_matrix,
-            glm::radians(yrot_mod),
-            //glm::radians(yrot_mod+=speed),
-            glm::vec3(0.f, 1.f, 0.f));
-
-        transformation_matrix = glm::rotate(transformation_matrix,
-            glm::radians(-60.f),
+            glm::radians(xrot_mod+=speed),
             glm::vec3(1.f, 0.f, 0.f));
 
         transformation_matrix = glm::rotate(transformation_matrix,
-            glm::radians(270.f),
+            glm::radians(90.f),
             glm::vec3(0.f, 0.f, 1.f));
 
         /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -776,7 +599,7 @@ int main(void)
         glBindVertexArray(VAO);
         glUseProgram(shaderProgram);
 
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / (5+3+6));
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / 14);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
