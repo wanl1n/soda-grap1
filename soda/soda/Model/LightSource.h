@@ -19,6 +19,7 @@ namespace models {
 
 			PointLight light;
 			float radius;
+			bool hasFreeMovement;
 
 		public:
 			LightSource(std::string path, glm::vec3 pos, glm::vec3 scale,
@@ -33,6 +34,7 @@ namespace models {
 
 		public:
 			PointLight* getLight();
+			void allowFreeMovement(bool allow);
 			void setColor(glm::vec4 color);
 	};
 }

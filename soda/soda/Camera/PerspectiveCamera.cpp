@@ -7,6 +7,7 @@ PerspectiveCamera::PerspectiveCamera(float height, float width) :
     // Create the projection matrix first.
     this->createProjection();
 
+    this->theta_tot = 90.0f;
     // Set the radius to an amount enough to see both objects.
     this->radius = 20.f;
 }
@@ -40,7 +41,7 @@ void PerspectiveCamera::calcMouseToCamera(glm::vec2 mousePos) {
     float zAxisRot = this->radius * cos(yaw) * cos(pitch);
 
     // Update the camera position with the new calculated point.
-    this->cameraPos = glm::vec3(xAxisRot, yAxisRot, zAxisRot);
+    this->cameraPos = glm::vec3(xAxisRot, yAxisRot, -zAxisRot);
 
     // Next, set the world Up vector to the y-axis.
     this->worldUp = glm::normalize(glm::vec3(0, 1.f, 0));

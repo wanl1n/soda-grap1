@@ -54,6 +54,9 @@ void Light::moveLight(float x_mod, float y_mod, float z_mod) {
 // Adds the accepted value to the intensity multiplier to alter.
 void Light::changeIntensity(float delta) {
     this->intensityMultiplier += delta;
+
+    // Limit the intensity so it doesn't go negative and take light away.
+    if (this->intensityMultiplier <= 0) this->intensityMultiplier = 0.01f;
 }
 
 // Sets the color of the light and the ambient color to the accepted color.

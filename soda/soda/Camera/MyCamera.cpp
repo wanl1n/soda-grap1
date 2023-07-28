@@ -9,7 +9,7 @@ MyCamera::MyCamera(float height, float width, float radius, float speed) :
     // Initialize with placeholder values to be altered when necessary in the child classes.
 
     this->radius = radius; // Distance of the camera to the object.
-    this->theta_tot = 360.f; // Max angle on the left or bottom side of the screen.
+    this->theta_tot = 90.f; // Max angle on the left or bottom side of the screen.
     this->speed = speed; // Speed of the camera movement.
     this->height = height; // height of the screen.
     this->width = width; // width of the screen.

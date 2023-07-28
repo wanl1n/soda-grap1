@@ -17,6 +17,9 @@ LightSource::LightSource(std::string path, glm::vec3 pos, glm::vec3 scale,
 
     // Sets the radius to 5 (this is the distance of the light source model from the main model.
     this->radius = 5.f;
+
+    // Set this to false since the object is orbiting.
+    this->hasFreeMovement = false;
 }
 
 // Loads the data of the model taken from the path.
@@ -86,22 +89,24 @@ void LightSource::draw(glm::mat4 projection, glm::mat4 viewMatrix) {
     glm::mat4 transformation_matrix = glm::translate(glm::mat4(1.0f),
         this->pos);
 
-    // Scales the object based on the set scale.
-    transformation_matrix = glm::scale(transformation_matrix,
-        this->scale);
+    this->xAxis = glm::vec3(radius, 0, 0);
+    this->yAxis = glm::vec3(0, radius, 0);
+    this->zAxis = glm::vec3(0, 0, radius);
 
-    // Rotates the object about the x-axis.
+    // Rotate the object on the corresponding axes.
     transformation_matrix = glm::rotate(transformation_matrix,
         glm::radians(this->thetaX),
         this->xAxis);
-    // Rotates the object about the y-axis.
     transformation_matrix = glm::rotate(transformation_matrix,
         glm::radians(this->thetaY),
         this->yAxis);
-    // Rotates the object about the z-axis.
     transformation_matrix = glm::rotate(transformation_matrix,
         glm::radians(this->thetaZ),
         this->zAxis);
+
+    // Scales the object based on the set scale.
+    transformation_matrix = glm::scale(transformation_matrix,
+        this->scale);
 
     // Updates the position of the light so it matches the light source model.
     this->light.setPosition(this->pos);
@@ -132,29 +137,43 @@ void LightSource::draw(glm::mat4 projection, glm::mat4 viewMatrix) {
 // Used to rotate the light source object around the main object.
 void LightSource::rotate(float thetaX, float thetaY, float thetaZ) {
 
-    // updates the rotation of the light source object by the offset.
-    this->thetaX += thetaX;
-    this->thetaY += thetaY;
-    this->thetaZ += thetaZ;
+    // If orbiting around main object.
+    if (!hasFreeMovement) {
+        // updates the rotation of the light source object by the offset.
+        this->thetaX += thetaX;
+        this->thetaY += thetaY;
+        this->thetaZ += thetaZ;
 
-    // Need to calculate the new position of the object to update the position property
-    // Calculate the rotation axes calculated using the mouse position and the angle limit of the screen.
-    float yaw = glm::radians((this->thetaX / radius) * 359.f);
-    float pitch = glm::radians((this->thetaY / radius) * 359.f);
+        float theta_tot = 90.f;
+        // Need to calculate the new position of the object to update the position property
+        // Calculate the rotation axes calculated using the angle of rotation of the object over the radius.
+        float yaw = glm::radians((this->thetaX / radius) * theta_tot);
+        float pitch = glm::radians((this->thetaY / radius) * theta_tot);
+        float roll = glm::radians(this->thetaZ / radius * theta_tot);
 
-    // Limiting the degree in case of flipping.
-    if (yaw > 359.9f) yaw = 359.9f;
-    if (yaw < -359.9f) yaw = -359.9f;
-    if (pitch > 359.9f) pitch = 359.9f;
-    if (pitch < -359.9f) pitch = -359.9f;
+        // Limiting the degree in case of flipping.
+        float limit = theta_tot - 0.1f;
+        if (yaw > limit) yaw = limit;
+        if (yaw < -limit) yaw = -limit;
+        if (pitch > limit) pitch = limit;
+        if (pitch < -limit) pitch = -limit;
+        if (roll > limit) roll = limit;
+        if (roll < -limit) roll = -limit;
 
-    // Finally get the direction in each axis by using Polar to Cartesian point conversion.
-    float xAxisRot = this->radius * sin(yaw) * cos(pitch);
-    float yAxisRot = this->radius * sin(pitch);
-    float zAxisRot = this->radius * cos(yaw) * cos(pitch);
-
-    // Update the model position with the new calculated point.
-    this->pos = glm::vec3(xAxisRot, yAxisRot, zAxisRot);
+        // Finally get the direction in each axis by using Rotation matrices to calculate the final point
+        float xAxisRot = this->radius * ((sin(yaw) * cos(pitch)) + (sin(yaw) * sin(pitch) * sin(roll) + cos(yaw) * cos(roll)) + (sin(yaw) * sin(pitch) * cos(roll) - cos(yaw) * sin(roll)));
+        float yAxisRot = this->radius * (-sin(pitch) + cos(pitch)*sin(roll) + cos(pitch)*cos(roll));
+        float zAxisRot = this->radius * ((cos(yaw) * cos(pitch)) + (cos(yaw)*sin(pitch)*sin(roll)-sin(yaw)*cos(roll))+(cos(yaw)*sin(pitch)*cos(roll)+sin(yaw)*sin(roll)));
+       
+        // Update the model position with the new calculated point.
+        this->pos = glm::vec3(xAxisRot, yAxisRot, -zAxisRot);
+    }
+    else {
+        // Free Movement in space
+        this->pos.x -= thetaY;
+        this->pos.y += thetaX;
+        this->pos.z -= thetaZ;
+    }
 }
 
 // Delete the buffer for clean up.
@@ -168,6 +187,12 @@ void LightSource::deleteBuffers() {
 PointLight* LightSource::getLight() {
     return &this->light;
 }
+
+// Allows free movement if true
+void LightSource::allowFreeMovement(bool allow) {
+    this->hasFreeMovement = allow;
+}
+
 
 // Set the color of this model to the accepted color and update the color of the light as well.
 void LightSource::setColor(glm::vec4 color) {

@@ -40,6 +40,7 @@ vec4 calcDirLight() {
 
 	// The intensity is simply based on the multiplier since directional light isn't dependent on distance.
 	float intensity = intensityMult_d;
+	if (intensity <= 0) intensity = 0.01f;
 	// Calculate the direction of the light by getting the unit vector of its position from the center.
 	vec3 lightDir = normalize(vec3(4, 11, -3));
 	

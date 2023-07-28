@@ -47,6 +47,8 @@ bool pointDecIntensity = false;
 bool dirIncIntensity = false;
 bool dirDecIntensity = false;
 
+bool allowFreeMovement = false;
+
 // Input checker
 void Key_Callback(
     GLFWwindow* window,
@@ -112,6 +114,9 @@ void Key_Callback(
         dirDecIntensity = true;
     if (key == GLFW_KEY_RIGHT && action == GLFW_RELEASE)
         dirDecIntensity = false;
+
+    if (key == GLFW_KEY_F && action == GLFW_PRESS)
+        allowFreeMovement = !allowFreeMovement;
 }
 
 void CreateProgram(const char* pathVert, const char* pathFrag, GLuint* shaderProgram) {
@@ -218,6 +223,9 @@ int main(void)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
 
+        // For light source movement options: Press F to switch between orbiting and free movement.
+        pointLightSource.allowFreeMovement(allowFreeMovement);
+
         // For Panning perspective Camera
         if (mainCamera == &persCamera) {
             // Get the mouse position.
@@ -294,6 +302,7 @@ int main(void)
             model->draw(mainCamera->getProjection(), viewMatrix);
         }
 
+        // Sets the shaderprogram back so that the model renders
         glUseProgram(shaderProgram);
 
         /* Swap front and back buffers */
