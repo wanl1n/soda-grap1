@@ -453,7 +453,7 @@ int main(void)
     );
 
     // Position of light
-    glm::vec3 lightPos = glm::vec3(1, 6, 1.f);
+    glm::vec3 lightPos = glm::vec3(1, 6, -6);
     // Light Color
     glm::vec3 lightColor = glm::vec3(1, 1.f, 1.f);
     // Ambient light strength
